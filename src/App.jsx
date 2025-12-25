@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TOOL_ITEMS = [
   { id: "component", label: "Component Box", icon: "🧩" },
@@ -29,7 +29,7 @@ const INITIAL_SHAPES = [
     y: 80,
     width: 180,
     height: 90,
-    stroke: "#2f5bea",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -47,7 +47,7 @@ const INITIAL_SHAPES = [
     y: 80,
     width: 180,
     height: 90,
-    stroke: "#2f5bea",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -65,7 +65,7 @@ const INITIAL_SHAPES = [
     y: 125,
     width: 90,
     height: 0,
-    stroke: "#1f2933",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -83,7 +83,7 @@ const INITIAL_SHAPES = [
     y: 240,
     width: 120,
     height: 180,
-    stroke: "#111827",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -101,7 +101,7 @@ const INITIAL_SHAPES = [
     y: 240,
     width: 120,
     height: 180,
-    stroke: "#111827",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -119,7 +119,7 @@ const INITIAL_SHAPES = [
     y: 260,
     width: 120,
     height: 90,
-    stroke: "#0f766e",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -137,7 +137,7 @@ const INITIAL_SHAPES = [
     y: 80,
     width: 100,
     height: 100,
-    stroke: "#7c2d12",
+    stroke: "#000000",
     fill: "transparent",
     fillEffect: "solid",
     strokeWidth: 1,
@@ -151,7 +151,7 @@ const INITIAL_SHAPES = [
 ];
 
 const DEFAULT_STYLE = {
-  stroke: "#2563eb",
+  stroke: "#000000",
   fill: "transparent",
   strokeWidth: 1,
   dash: "solid",
@@ -173,7 +173,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 180,
         height: 90,
-        stroke: "#2f5bea",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -188,7 +188,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 120,
         height: 180,
-        stroke: "#111827",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "8 6",
@@ -203,7 +203,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 120,
         height: 0,
-        stroke: "#111827",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -218,7 +218,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 120,
         height: 90,
-        stroke: "#0f766e",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -233,7 +233,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 140,
         height: 110,
-        stroke: "#0f766e",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -248,7 +248,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 110,
         height: 110,
-        stroke: "#7c2d12",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -263,7 +263,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 120,
         height: 120,
-        stroke: "#1d4ed8",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -278,7 +278,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 140,
         height: 120,
-        stroke: "#0f766e",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -293,7 +293,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 130,
         height: 100,
-        stroke: "#6d28d9",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -308,7 +308,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 150,
         height: 90,
-        stroke: "#b45309",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -323,7 +323,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 150,
         height: 90,
-        stroke: "#0f766e",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -338,7 +338,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 150,
         height: 90,
-        stroke: "#b91c1c",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -353,7 +353,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 150,
         height: 90,
-        stroke: "#7c3aed",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -368,7 +368,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 150,
         height: 90,
-        stroke: "#0f766e",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -383,7 +383,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 140,
         height: 0,
-        stroke: "#1f2933",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -398,7 +398,7 @@ const getShapeDefaults = (type) => {
       return {
         width: 140,
         height: 90,
-        stroke: "#1f2933",
+        stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
@@ -1795,6 +1795,9 @@ const DiagramCanvas = ({
 };
 
 const SNAP_DISTANCE = 12;
+const LINE_VERTEX_SNAP_DISTANCE = 18;
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGHT = 700;
 const SNAP_AXES = ["x", "y"];
 
 const getShapeAnchors = (shape) => {
@@ -1845,6 +1848,52 @@ const getSnapResult = (movingShape, shapes, nextX, nextY) => {
     x: nextX + bestMatch.x.delta,
     y: nextY + bestMatch.y.delta,
     guides: [bestMatch.x.guide, bestMatch.y.guide].filter(Boolean),
+  };
+};
+
+const getLineVertexSnap = (movingShape, shapes, nextX, nextY) => {
+  if (!["line", "arrow"].includes(movingShape.type)) {
+    return null;
+  }
+  const endpoints = [
+    { x: nextX, y: nextY },
+    { x: nextX + movingShape.width, y: nextY },
+  ];
+  let bestMatch = null;
+
+  shapes.forEach((shape) => {
+    if (shape.id === movingShape.id) {
+      return;
+    }
+    const vertices = getShapeVertices(shape);
+    if (!vertices.length) {
+      return;
+    }
+    vertices.forEach((vertex) => {
+      endpoints.forEach((endpoint) => {
+        const dx = vertex.x - endpoint.x;
+        const dy = vertex.y - endpoint.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance <= LINE_VERTEX_SNAP_DISTANCE) {
+          if (!bestMatch || distance < bestMatch.distance) {
+            bestMatch = {
+              distance,
+              deltaX: dx,
+              deltaY: dy,
+            };
+          }
+        }
+      });
+    });
+  });
+
+  if (!bestMatch) {
+    return null;
+  }
+
+  return {
+    x: nextX + bestMatch.deltaX,
+    y: nextY + bestMatch.deltaY,
   };
 };
 
@@ -1913,6 +1962,21 @@ export default function App() {
       if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
         return;
       }
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        const step = event.shiftKey ? 10 : 1;
+        const deltaMap = {
+          ArrowUp: { x: 0, y: -step },
+          ArrowDown: { x: 0, y: step },
+          ArrowLeft: { x: -step, y: 0 },
+          ArrowRight: { x: step, y: 0 },
+        };
+        const delta = deltaMap[event.key];
+        if (delta) {
+          event.preventDefault();
+          moveSelectedShapes(delta.x, delta.y);
+        }
+        return;
+      }
       if (event.key === "Delete" || event.key === "Backspace") {
         setDiagrams((prev) =>
           prev.map((diagram) =>
@@ -1931,9 +1995,9 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeDiagramId, selectedIds]);
+  }, [activeDiagramId, moveSelectedShapes, selectedIds]);
 
-  const updateActiveShapes = (updater) => {
+  const updateActiveShapes = useCallback((updater) => {
     if (!activeDiagramId) {
       return;
     }
@@ -1944,7 +2008,35 @@ export default function App() {
           : diagram
       )
     );
-  };
+  }, [activeDiagramId]);
+
+  const moveSelectedShapes = useCallback((deltaX, deltaY) => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+    updateActiveShapes((prev) =>
+      prev.map((shape) => {
+        if (!selectedIds.includes(shape.id)) {
+          return shape;
+        }
+        const bounds = getShapeBounds(shape);
+        const nextX = clampNumber(
+          bounds.x + deltaX,
+          0,
+          CANVAS_WIDTH - bounds.width
+        );
+        const nextY = clampNumber(
+          bounds.y + deltaY,
+          0,
+          CANVAS_HEIGHT - bounds.height
+        );
+        const appliedDeltaX = nextX - bounds.x;
+        const appliedDeltaY = nextY - bounds.y;
+        return translateShape(shape, appliedDeltaX, appliedDeltaY);
+      })
+    );
+    setSnapGuides([]);
+  }, [selectedIds, updateActiveShapes]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -2237,8 +2329,8 @@ export default function App() {
           const nextPoints = (shape.points ?? []).map((point, index) =>
             index === drag.vertexIndex
               ? {
-                  x: clampNumber(x, 0, 1000),
-                  y: clampNumber(y, 0, 700),
+                  x: clampNumber(x, 0, CANVAS_WIDTH),
+                  y: clampNumber(y, 0, CANVAS_HEIGHT),
                 }
               : point
           );
@@ -2257,8 +2349,8 @@ export default function App() {
               label.id === drag.labelId
                 ? {
                     ...label,
-                    x: clampNumber(x - drag.offsetX, 0, 1000),
-                    y: clampNumber(y - drag.offsetY, 0, 700),
+                    x: clampNumber(x - drag.offsetX, 0, CANVAS_WIDTH),
+                    y: clampNumber(y - drag.offsetY, 0, CANVAS_HEIGHT),
                   }
                 : label
             ),
@@ -2290,8 +2382,8 @@ export default function App() {
             nextY = drag.startY + (drag.startHeight - nextHeight);
           }
           setSnapGuides([]);
-          const clampedX = clampNumber(nextX, 0, 1000 - nextWidth);
-          const clampedY = clampNumber(nextY, 0, 700 - nextHeight);
+          const clampedX = clampNumber(nextX, 0, CANVAS_WIDTH - nextWidth);
+          const clampedY = clampNumber(nextY, 0, CANVAS_HEIGHT - nextHeight);
           const scaleX = drag.startWidth ? nextWidth / drag.startWidth : 1;
           const scaleY = drag.startHeight ? nextHeight / drag.startHeight : 1;
           const nextLabels = drag.startLabels
@@ -2346,17 +2438,20 @@ export default function App() {
         }
         const nextX = x - drag.offsetX;
         const nextY = y - drag.offsetY;
-        const maxX = 1000 - shape.width;
-        const maxY = 700 - shape.height;
+        const maxX = CANVAS_WIDTH - shape.width;
+        const maxY = CANVAS_HEIGHT - shape.height;
         const { x: snappedX, y: snappedY, guides } = getSnapResult(
           shape,
           prev,
           clampNumber(nextX, 0, maxX),
           clampNumber(nextY, 0, maxY)
         );
-        setSnapGuides(guides);
-        const deltaX = snappedX - shape.x;
-        const deltaY = snappedY - shape.y;
+        const vertexSnap = getLineVertexSnap(shape, prev, snappedX, snappedY);
+        const finalX = vertexSnap?.x ?? snappedX;
+        const finalY = vertexSnap?.y ?? snappedY;
+        setSnapGuides(vertexSnap ? [] : guides);
+        const deltaX = finalX - shape.x;
+        const deltaY = finalY - shape.y;
         if (shape.type === "compound") {
           return translateShape(shape, deltaX, deltaY);
         }
@@ -2374,16 +2469,16 @@ export default function App() {
           }));
           return {
             ...shape,
-            x: snappedX,
-            y: snappedY,
+            x: finalX,
+            y: finalY,
             points: movedPoints,
             vertexLabels: movedLabels,
           };
         }
         return {
           ...shape,
-          x: snappedX,
-          y: snappedY,
+          x: finalX,
+          y: finalY,
           vertexLabels: movedLabels,
         };
       })
