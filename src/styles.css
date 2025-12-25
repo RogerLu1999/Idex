@@ -195,6 +195,21 @@ svg text {
   font-size: 14px;
 }
 
+.property-row select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.snap-guide {
+  stroke: #38bdf8;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+  pointer-events: none;
+}
+
 .property-row.split {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
