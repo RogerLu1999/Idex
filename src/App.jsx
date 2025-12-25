@@ -161,18 +161,10 @@ const DEFAULT_STYLE = {
   fillEffect: "solid",
 };
 
-const NAV_SECTIONS = [
-  {
-    title: "Diagram Sets",
-    items: ["Component Interaction", "Calling Sequence", "Geometry"],
-  },
-  { title: "Workspace", items: ["Default Canvas", "Templates", "Exports"] },
-];
-
 const CREATE_LINKS = [
-  { id: "create-component", label: "Create component diagram" },
-  { id: "create-sequence", label: "Create sequence diagram" },
-  { id: "create-geometry", label: "Create geometry diagram" },
+  { id: "create-component", label: "Create component diagram", template: "component" },
+  { id: "create-sequence", label: "Create sequence diagram", template: "sequence" },
+  { id: "create-geometry", label: "Create geometry diagram", template: "geometry" },
 ];
 
 const getShapeDefaults = (type) => {
@@ -449,6 +441,71 @@ const getShapeDefaults = (type) => {
         label: "",
       };
   }
+};
+
+const createShapeWithDefaults = (id, type, overrides = {}) => ({
+  id,
+  type,
+  ...getShapeDefaults(type),
+  ...overrides,
+});
+
+const SEQUENCE_SHAPES = [
+  createShapeWithDefaults("shape-seq-1", "sequence", {
+    x: 140,
+    y: 140,
+    label: "Caller",
+  }),
+  createShapeWithDefaults("shape-seq-2", "sequence", {
+    x: 360,
+    y: 140,
+    label: "Receiver",
+  }),
+  createShapeWithDefaults("shape-seq-3", "arrow", {
+    x: 260,
+    y: 190,
+    width: 120,
+    label: "Request",
+  }),
+  createShapeWithDefaults("shape-seq-4", "arrow", {
+    x: 260,
+    y: 240,
+    width: 120,
+    dash: "8 6",
+    label: "Response",
+  }),
+];
+
+const GEOMETRY_SHAPES = [
+  createShapeWithDefaults("shape-geo-1", "right-triangle", {
+    x: 120,
+    y: 160,
+    label: "Right △",
+  }),
+  createShapeWithDefaults("shape-geo-2", "line", {
+    x: 340,
+    y: 220,
+    width: 160,
+    label: "Line",
+  }),
+  createShapeWithDefaults("shape-geo-3", "perp-line", {
+    x: 520,
+    y: 160,
+    width: 140,
+    height: 90,
+    label: "Perp",
+  }),
+  createShapeWithDefaults("shape-geo-4", "circle", {
+    x: 540,
+    y: 320,
+    label: "Circle",
+  }),
+];
+
+const DIAGRAM_TEMPLATES = {
+  component: { name: "Component Interaction", shapes: INITIAL_SHAPES },
+  sequence: { name: "Calling Sequence", shapes: SEQUENCE_SHAPES },
+  geometry: { name: "Geometry", shapes: GEOMETRY_SHAPES },
 };
 
 const BOOLEAN_SHAPE_TYPES = new Set([
@@ -1037,6 +1094,16 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y1={shape.y}
             x2={shape.x + shape.width}
             y2={shape.y}
+            stroke="transparent"
+            strokeWidth={Math.max(12, shape.strokeWidth + 10)}
+            pointerEvents="stroke"
+          />
+          <line
+            {...commonProps}
+            x1={shape.x}
+            y1={shape.y}
+            x2={shape.x + shape.width}
+            y2={shape.y}
             markerEnd="url(#arrow)"
           />
           <text
@@ -1051,6 +1118,16 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     case "line":
       return (
         <g key={shape.id} {...groupProps}>
+          <line
+            {...commonProps}
+            x1={shape.x}
+            y1={shape.y}
+            x2={shape.x + shape.width}
+            y2={shape.y}
+            stroke="transparent"
+            strokeWidth={Math.max(12, shape.strokeWidth + 10)}
+            pointerEvents="stroke"
+          />
           <line
             {...commonProps}
             x1={shape.x}
@@ -1485,15 +1562,96 @@ const DiagramCanvas = ({
   onLabelPointerDown,
   onPointerMove,
   onPointerUp,
-}) => (
-  <svg
-    className="canvas"
-    viewBox="0 0 1000 700"
-    onClick={() => onSelect(null)}
-    onPointerMove={onPointerMove}
-    onPointerUp={onPointerUp}
-    onPointerLeave={onPointerUp}
-  >
+}) => {
+  const isLineShape = selectedShape
+    ? ["line", "arrow"].includes(selectedShape.type)
+    : false;
+  const selectionPadding = isLineShape ? 6 : 0;
+  const selectionOutlineHeight = selectedShape
+    ? isLineShape
+      ? Math.max(12, selectedShape.height)
+      : selectedShape.height
+    : 0;
+  const selectionOutlineY = selectedShape
+    ? selectedShape.y - selectionPadding
+    : 0;
+  const resizeHandles = selectedShape
+    ? isLineShape
+      ? [
+          {
+            id: "w",
+            x: selectedShape.x,
+            y: selectedShape.y,
+            cursor: "ew-resize",
+          },
+          {
+            id: "e",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y,
+            cursor: "ew-resize",
+          },
+        ]
+      : [
+          {
+            id: "nw",
+            x: selectedShape.x,
+            y: selectedShape.y,
+            cursor: "nwse-resize",
+          },
+          {
+            id: "n",
+            x: selectedShape.x + selectedShape.width / 2,
+            y: selectedShape.y,
+            cursor: "ns-resize",
+          },
+          {
+            id: "ne",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y,
+            cursor: "nesw-resize",
+          },
+          {
+            id: "e",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y + selectedShape.height / 2,
+            cursor: "ew-resize",
+          },
+          {
+            id: "se",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "nwse-resize",
+          },
+          {
+            id: "s",
+            x: selectedShape.x + selectedShape.width / 2,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "ns-resize",
+          },
+          {
+            id: "sw",
+            x: selectedShape.x,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "nesw-resize",
+          },
+          {
+            id: "w",
+            x: selectedShape.x,
+            y: selectedShape.y + selectedShape.height / 2,
+            cursor: "ew-resize",
+          },
+        ]
+    : [];
+
+  return (
+    <svg
+      className="canvas"
+      viewBox="0 0 1000 700"
+      onClick={() => onSelect(null)}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerLeave={onPointerUp}
+    >
     <defs>
       <pattern
         id="grid"
@@ -1584,9 +1742,9 @@ const DiagramCanvas = ({
         <rect
           className="selection-outline"
           x={selectedShape.x}
-          y={selectedShape.y}
+          y={selectionOutlineY}
           width={selectedShape.width}
-          height={selectedShape.height}
+          height={selectionOutlineHeight}
         />
         <line
           className="rotation-guide"
@@ -1602,56 +1760,7 @@ const DiagramCanvas = ({
           r="6"
           onPointerDown={(event) => onRotatePointerDown(event, selectedShape)}
         />
-        {[
-          {
-            id: "nw",
-            x: selectedShape.x,
-            y: selectedShape.y,
-            cursor: "nwse-resize",
-          },
-          {
-            id: "n",
-            x: selectedShape.x + selectedShape.width / 2,
-            y: selectedShape.y,
-            cursor: "ns-resize",
-          },
-          {
-            id: "ne",
-            x: selectedShape.x + selectedShape.width,
-            y: selectedShape.y,
-            cursor: "nesw-resize",
-          },
-          {
-            id: "e",
-            x: selectedShape.x + selectedShape.width,
-            y: selectedShape.y + selectedShape.height / 2,
-            cursor: "ew-resize",
-          },
-          {
-            id: "se",
-            x: selectedShape.x + selectedShape.width,
-            y: selectedShape.y + selectedShape.height,
-            cursor: "nwse-resize",
-          },
-          {
-            id: "s",
-            x: selectedShape.x + selectedShape.width / 2,
-            y: selectedShape.y + selectedShape.height,
-            cursor: "ns-resize",
-          },
-          {
-            id: "sw",
-            x: selectedShape.x,
-            y: selectedShape.y + selectedShape.height,
-            cursor: "nesw-resize",
-          },
-          {
-            id: "w",
-            x: selectedShape.x,
-            y: selectedShape.y + selectedShape.height / 2,
-            cursor: "ew-resize",
-          },
-        ].map((handle) => (
+        {resizeHandles.map((handle) => (
           <rect
             key={handle.id}
             className="selection-handle"
@@ -1682,7 +1791,8 @@ const DiagramCanvas = ({
       </g>
     ) : null}
   </svg>
-);
+  );
+};
 
 const SNAP_DISTANCE = 12;
 const SNAP_AXES = ["x", "y"];
@@ -1738,15 +1848,47 @@ const getSnapResult = (movingShape, shapes, nextX, nextY) => {
   };
 };
 
+const cloneShape = (shape) => ({
+  ...shape,
+  points: shape.points ? shape.points.map((point) => ({ ...point })) : shape.points,
+  vertexLabels: shape.vertexLabels
+    ? shape.vertexLabels.map((label) => ({ ...label }))
+    : shape.vertexLabels,
+  children: shape.children ? shape.children.map((child) => cloneShape(child)) : shape.children,
+});
+
+const cloneShapes = (shapes) => shapes.map((shape) => cloneShape(shape));
+
 export default function App() {
-  const [shapes, setShapes] = useState(INITIAL_SHAPES);
-  const [selectedIds, setSelectedIds] = useState(
-    shapes[0]?.id ? [shapes[0].id] : []
-  );
+  const [diagrams, setDiagrams] = useState(() => [
+    {
+      id: "diagram-1",
+      name: DIAGRAM_TEMPLATES.component.name,
+      shapes: cloneShapes(DIAGRAM_TEMPLATES.component.shapes),
+    },
+    {
+      id: "diagram-2",
+      name: DIAGRAM_TEMPLATES.sequence.name,
+      shapes: cloneShapes(DIAGRAM_TEMPLATES.sequence.shapes),
+    },
+    {
+      id: "diagram-3",
+      name: DIAGRAM_TEMPLATES.geometry.name,
+      shapes: cloneShapes(DIAGRAM_TEMPLATES.geometry.shapes),
+    },
+  ]);
+  const [activeDiagramId, setActiveDiagramId] = useState("diagram-1");
+  const [selectedIds, setSelectedIds] = useState([]);
   const [snapGuides, setSnapGuides] = useState([]);
   const [showGrid, setShowGrid] = useState(true);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
+  const diagramCounter = useRef(3);
   const dragState = useRef(null);
+  const activeDiagram = useMemo(
+    () => diagrams.find((diagram) => diagram.id === activeDiagramId),
+    [activeDiagramId, diagrams]
+  );
+  const shapes = activeDiagram?.shapes ?? [];
   const selectedId = selectedIds[0] ?? null;
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
@@ -1762,18 +1904,47 @@ export default function App() {
   }, [selectedId]);
 
   useEffect(() => {
+    const firstId = shapes[0]?.id;
+    setSelectedIds(firstId ? [firstId] : []);
+  }, [activeDiagramId]);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
         return;
       }
       if (event.key === "Delete" || event.key === "Backspace") {
-        setShapes((prev) => prev.filter((shape) => !selectedIds.includes(shape.id)));
+        setDiagrams((prev) =>
+          prev.map((diagram) =>
+            diagram.id === activeDiagramId
+              ? {
+                  ...diagram,
+                  shapes: diagram.shapes.filter(
+                    (shape) => !selectedIds.includes(shape.id)
+                  ),
+                }
+              : diagram
+          )
+        );
         setSelectedIds([]);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedIds]);
+  }, [activeDiagramId, selectedIds]);
+
+  const updateActiveShapes = (updater) => {
+    if (!activeDiagramId) {
+      return;
+    }
+    setDiagrams((prev) =>
+      prev.map((diagram) =>
+        diagram.id === activeDiagramId
+          ? { ...diagram, shapes: updater(diagram.shapes) }
+          : diagram
+      )
+    );
+  };
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -1800,7 +1971,7 @@ export default function App() {
         angles,
       };
     }
-    setShapes((prev) => [...prev, newShape]);
+    updateActiveShapes((prev) => [...prev, newShape]);
     setSelectedIds([newShape.id]);
   };
 
@@ -1808,7 +1979,7 @@ export default function App() {
     if (!selectedShape) {
       return;
     }
-    setShapes((prev) =>
+    updateActiveShapes((prev) =>
       prev.map((shape) =>
             shape.id === selectedShape.id
           ? (() => {
@@ -1902,7 +2073,7 @@ export default function App() {
       { x: selectedShape.x + baseWidth, y: baseY },
       { x: selectedShape.x + apexX, y: baseY - height },
     ];
-    setShapes((prev) =>
+    updateActiveShapes((prev) =>
       prev.map((shape) =>
         shape.id === selectedShape.id
           ? {
@@ -1922,7 +2093,7 @@ export default function App() {
       return;
     }
     const labels = createVertexLabels(selectedShape);
-    setShapes((prev) =>
+    updateActiveShapes((prev) =>
       prev.map((shape) =>
         shape.id === selectedShape.id
           ? {
@@ -1938,7 +2109,7 @@ export default function App() {
     if (!selectedShape) {
       return;
     }
-    setShapes((prev) =>
+    updateActiveShapes((prev) =>
       prev.map((shape) =>
         shape.id === selectedShape.id
           ? {
@@ -2057,7 +2228,7 @@ export default function App() {
     }
     const drag = dragState.current;
     const { x, y } = getPointerPosition(event);
-    setShapes((prev) =>
+    updateActiveShapes((prev) =>
       prev.map((shape) => {
         if (shape.id !== drag.id) {
           return shape;
@@ -2160,7 +2331,11 @@ export default function App() {
         }
         if (drag.mode === "rotate") {
           const angle = Math.atan2(y - drag.centerY, x - drag.centerX) * (180 / Math.PI);
-          const nextRotation = drag.startAngle + (angle - drag.startPointerAngle);
+          let nextRotation = drag.startAngle + (angle - drag.startPointerAngle);
+          if (event.shiftKey) {
+            const snapStep = 15;
+            nextRotation = Math.round(nextRotation / snapStep) * snapStep;
+          }
           const normalizedRotation =
             ((((nextRotation + 180) % 360) + 360) % 360) - 180;
           setSnapGuides([]);
@@ -2258,7 +2433,9 @@ export default function App() {
     if (selectedIds.length === 0) {
       return;
     }
-    setShapes((prev) => prev.filter((shape) => !selectedIds.includes(shape.id)));
+    updateActiveShapes((prev) =>
+      prev.filter((shape) => !selectedIds.includes(shape.id))
+    );
     setSelectedIds([]);
   };
 
@@ -2303,7 +2480,7 @@ export default function App() {
       label: "",
       children: [cloneShapeForCompound(first), cloneShapeForCompound(second)],
     };
-    setShapes((prev) => [
+    updateActiveShapes((prev) => [
       ...prev.filter((shape) => !selectedIds.includes(shape.id)),
       mergedShape,
     ]);
@@ -2336,11 +2513,31 @@ export default function App() {
       label: "",
       children: [cloneShapeForCompound(baseShape), cloneShapeForCompound(cutterShape)],
     };
-    setShapes((prev) => [
+    updateActiveShapes((prev) => [
       ...prev.filter((shape) => !selectedIds.includes(shape.id)),
       clippedShape,
     ]);
     setSelectedIds([clippedShape.id]);
+  };
+
+  const handleSelectDiagram = (diagramId) => {
+    setActiveDiagramId(diagramId);
+  };
+
+  const handleCreateDiagram = (templateId) => {
+    const template = DIAGRAM_TEMPLATES[templateId];
+    if (!template) {
+      return;
+    }
+    const nextIndex = diagramCounter.current + 1;
+    diagramCounter.current = nextIndex;
+    const newDiagram = {
+      id: `diagram-${nextIndex}`,
+      name: `${template.name} ${nextIndex}`,
+      shapes: cloneShapes(template.shapes),
+    };
+    setDiagrams((prev) => [...prev, newDiagram]);
+    setActiveDiagramId(newDiagram.id);
   };
 
   return (
@@ -2376,28 +2573,37 @@ export default function App() {
             <ul className="nav-links">
               {CREATE_LINKS.map((link) => (
                 <li key={link.id}>
-                  <a href="#" onClick={(event) => event.preventDefault()}>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateDiagram(link.template)}
+                  >
                     {link.label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
-          {NAV_SECTIONS.map((section) => (
-            <div className="nav-group" key={section.title}>
-              <h3>{section.title}</h3>
-              <ul>
-                {section.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="nav-group">
+            <h3>Your diagrams</h3>
+            <ul className="nav-diagrams">
+              {diagrams.map((diagram) => (
+                <li key={diagram.id}>
+                  <button
+                    type="button"
+                    className={diagram.id === activeDiagramId ? "active" : ""}
+                    onClick={() => handleSelectDiagram(diagram.id)}
+                  >
+                    {diagram.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </aside>
 
         <main className="canvas-wrapper">
           <div className="canvas-header">
-            <span>Default Workspace</span>
+            <span>{activeDiagram?.name ?? "Workspace"}</span>
             <div className="canvas-controls">
               <label className="grid-toggle">
                 <input
@@ -2757,6 +2963,7 @@ export default function App() {
               <li>Use the toolbar to add components, sequence lifelines, and geometry.</li>
               <li>Click any shape on the canvas to edit its colors and sizing.</li>
               <li>Drag shapes close to each other to snap edges or line endpoints.</li>
+              <li>Hold Shift while rotating to snap angles for perpendiculars or bisectors.</li>
               <li>Layer diagrams to express system interaction clearly.</li>
             </ul>
           </div>
