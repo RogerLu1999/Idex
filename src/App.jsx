@@ -1957,46 +1957,6 @@ export default function App() {
     setSelectedIds(firstId ? [firstId] : []);
   }, [activeDiagramId]);
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
-        return;
-      }
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-        const step = event.shiftKey ? 10 : 1;
-        const deltaMap = {
-          ArrowUp: { x: 0, y: -step },
-          ArrowDown: { x: 0, y: step },
-          ArrowLeft: { x: -step, y: 0 },
-          ArrowRight: { x: step, y: 0 },
-        };
-        const delta = deltaMap[event.key];
-        if (delta) {
-          event.preventDefault();
-          moveSelectedShapes(delta.x, delta.y);
-        }
-        return;
-      }
-      if (event.key === "Delete" || event.key === "Backspace") {
-        setDiagrams((prev) =>
-          prev.map((diagram) =>
-            diagram.id === activeDiagramId
-              ? {
-                  ...diagram,
-                  shapes: diagram.shapes.filter(
-                    (shape) => !selectedIds.includes(shape.id)
-                  ),
-                }
-              : diagram
-          )
-        );
-        setSelectedIds([]);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeDiagramId, moveSelectedShapes, selectedIds]);
-
   const updateActiveShapes = useCallback((updater) => {
     if (!activeDiagramId) {
       return;
@@ -2037,6 +1997,46 @@ export default function App() {
     );
     setSnapGuides([]);
   }, [selectedIds, updateActiveShapes]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
+        return;
+      }
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        const step = event.shiftKey ? 10 : 1;
+        const deltaMap = {
+          ArrowUp: { x: 0, y: -step },
+          ArrowDown: { x: 0, y: step },
+          ArrowLeft: { x: -step, y: 0 },
+          ArrowRight: { x: step, y: 0 },
+        };
+        const delta = deltaMap[event.key];
+        if (delta) {
+          event.preventDefault();
+          moveSelectedShapes(delta.x, delta.y);
+        }
+        return;
+      }
+      if (event.key === "Delete" || event.key === "Backspace") {
+        setDiagrams((prev) =>
+          prev.map((diagram) =>
+            diagram.id === activeDiagramId
+              ? {
+                  ...diagram,
+                  shapes: diagram.shapes.filter(
+                    (shape) => !selectedIds.includes(shape.id)
+                  ),
+                }
+              : diagram
+          )
+        );
+        setSelectedIds([]);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeDiagramId, moveSelectedShapes, selectedIds]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -2619,6 +2619,46 @@ export default function App() {
     setActiveDiagramId(diagramId);
   };
 
+  const handleRenameDiagram = (diagramId) => {
+    const diagram = diagrams.find((item) => item.id === diagramId);
+    if (!diagram) {
+      return;
+    }
+    const nextName = window.prompt("Rename diagram", diagram.name);
+    if (!nextName) {
+      return;
+    }
+    const trimmedName = nextName.trim();
+    if (!trimmedName) {
+      return;
+    }
+    setDiagrams((prev) =>
+      prev.map((item) =>
+        item.id === diagramId ? { ...item, name: trimmedName } : item
+      )
+    );
+  };
+
+  const handleDeleteDiagram = (diagramId) => {
+    const diagram = diagrams.find((item) => item.id === diagramId);
+    if (!diagram) {
+      return;
+    }
+    const shouldDelete = window.confirm(
+      `Delete "${diagram.name}"? This cannot be undone.`
+    );
+    if (!shouldDelete) {
+      return;
+    }
+    setDiagrams((prev) => {
+      const next = prev.filter((item) => item.id !== diagramId);
+      if (diagramId === activeDiagramId) {
+        setActiveDiagramId(next[0]?.id ?? null);
+      }
+      return next;
+    });
+  };
+
   const handleCreateDiagram = (templateId) => {
     const template = DIAGRAM_TEMPLATES[templateId];
     if (!template) {
@@ -2683,13 +2723,32 @@ export default function App() {
             <ul className="nav-diagrams">
               {diagrams.map((diagram) => (
                 <li key={diagram.id}>
-                  <button
-                    type="button"
-                    className={diagram.id === activeDiagramId ? "active" : ""}
-                    onClick={() => handleSelectDiagram(diagram.id)}
-                  >
-                    {diagram.name}
-                  </button>
+                  <div className="diagram-row">
+                    <button
+                      type="button"
+                      className={`diagram-select ${
+                        diagram.id === activeDiagramId ? "active" : ""
+                      }`}
+                      onClick={() => handleSelectDiagram(diagram.id)}
+                    >
+                      {diagram.name}
+                    </button>
+                    <div className="diagram-actions">
+                      <button
+                        type="button"
+                        onClick={() => handleRenameDiagram(diagram.id)}
+                      >
+                        Rename
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => handleDeleteDiagram(diagram.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>

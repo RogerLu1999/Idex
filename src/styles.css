@@ -127,7 +127,7 @@ body {
 }
 
 .nav-links button,
-.nav-diagrams button {
+.nav-diagrams .diagram-select {
   width: 100%;
   text-align: left;
   border: none;
@@ -147,19 +147,54 @@ body {
   background: #e0e7ff;
 }
 
-.nav-diagrams button {
+.nav-diagrams .diagram-select {
   background: #f8fafc;
   color: #0f172a;
   font-weight: 600;
 }
 
-.nav-diagrams button:hover {
+.nav-diagrams .diagram-select:hover {
   background: #e2e8f0;
 }
 
-.nav-diagrams button.active {
+.nav-diagrams .diagram-select.active {
   background: #1d4ed8;
   color: #ffffff;
+}
+
+.nav-diagrams .diagram-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-diagrams .diagram-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-diagrams .diagram-actions button {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+}
+
+.nav-diagrams .diagram-actions button:hover {
+  background: #f1f5f9;
+}
+
+.nav-diagrams .diagram-actions .danger {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.nav-diagrams .diagram-actions .danger:hover {
+  background: #ffe4e6;
 }
 
 .canvas-wrapper {
