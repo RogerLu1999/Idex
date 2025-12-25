@@ -119,26 +119,47 @@ body {
   font-size: 14px;
 }
 
-.nav-links a {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  text-decoration: none;
-  color: #1d4ed8;
-  font-weight: 600;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: #eef2ff;
+.nav-links li,
+.nav-diagrams li {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.nav-links a:hover {
+.nav-links button,
+.nav-diagrams button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.nav-links button {
+  background: #eef2ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.nav-links button:hover {
   background: #e0e7ff;
 }
 
-.nav-group li {
-  padding: 8px 10px;
-  border-radius: 8px;
+.nav-diagrams button {
   background: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.nav-diagrams button:hover {
+  background: #e2e8f0;
+}
+
+.nav-diagrams button.active {
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 .canvas-wrapper {
