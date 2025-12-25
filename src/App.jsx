@@ -1,18 +1,23 @@
 import { useMemo, useRef, useState } from "react";
 
 const TOOL_ITEMS = [
-  { id: "component", label: "Component Box" },
-  { id: "arrow", label: "Arrow" },
-  { id: "sequence", label: "Sequence Lifeline" },
-  { id: "rect", label: "Rectangle" },
-  { id: "rounded", label: "Rounded Rect" },
-  { id: "circle", label: "Circle" },
-  { id: "diamond", label: "Diamond" },
-  { id: "hexagon", label: "Hexagon" },
-  { id: "parallelogram", label: "Parallelogram" },
-  { id: "right-triangle", label: "Right Triangle" },
-  { id: "line", label: "Line" },
-  { id: "perp-line", label: "Perpendicular" },
+  { id: "component", label: "Component Box", icon: "🧩" },
+  { id: "arrow", label: "Arrow", icon: "➡️" },
+  { id: "sequence", label: "Sequence Lifeline", icon: "📍" },
+  { id: "rect", label: "Rectangle", icon: "▭" },
+  { id: "rounded", label: "Rounded Rect", icon: "▢" },
+  { id: "circle", label: "Circle", icon: "⚪" },
+  { id: "sphere", label: "Sphere", icon: "🫧" },
+  { id: "cylinder", label: "Cylinder", icon: "🧃" },
+  { id: "diamond", label: "Diamond", icon: "🔷" },
+  { id: "hexagon", label: "Hexagon", icon: "⬡" },
+  { id: "parallelogram", label: "Parallelogram", icon: "▱" },
+  { id: "trapezoid", label: "Trapezoid", icon: "⏢" },
+  { id: "isosceles-trapezoid", label: "Isosceles Trapezoid", icon: "⏥" },
+  { id: "right-trapezoid", label: "Right Trapezoid", icon: "⏢" },
+  { id: "right-triangle", label: "Right Triangle", icon: "◿" },
+  { id: "line", label: "Line", icon: "➖" },
+  { id: "perp-line", label: "Perpendicular", icon: "⟂" },
 ];
 
 const INITIAL_SHAPES = [
@@ -30,6 +35,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 10,
+    rotation: 0,
     label: "Service A",
   },
   {
@@ -46,6 +52,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 10,
+    rotation: 0,
     label: "Service B",
   },
   {
@@ -62,6 +69,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 0,
+    rotation: 0,
     label: "gRPC",
   },
   {
@@ -78,6 +86,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 8,
+    rotation: 0,
     label: "Caller",
   },
   {
@@ -94,6 +103,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 8,
+    rotation: 0,
     label: "Receiver",
   },
   {
@@ -110,6 +120,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 0,
+    rotation: 0,
     label: "直角三角形",
   },
   {
@@ -126,6 +137,7 @@ const INITIAL_SHAPES = [
     fillOpacity: 1,
     fontSize: 12,
     cornerRadius: 0,
+    rotation: 0,
     label: "圆",
   },
 ];
@@ -167,6 +179,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 10,
+        rotation: 0,
         label: "New Component",
       };
     case "sequence":
@@ -180,6 +193,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 8,
+        rotation: 0,
         label: "Lifeline",
       };
     case "arrow":
@@ -193,6 +207,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "call",
       };
     case "right-triangle":
@@ -206,6 +221,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "直角三角形",
       };
     case "circle":
@@ -219,7 +235,36 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "圆",
+      };
+    case "sphere":
+      return {
+        width: 120,
+        height: 120,
+        stroke: "#1d4ed8",
+        fill: "#dbeafe",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "球体",
+      };
+    case "cylinder":
+      return {
+        width: 140,
+        height: 120,
+        stroke: "#0f766e",
+        fill: "#ccfbf1",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "圆柱体",
       };
     case "diamond":
       return {
@@ -232,6 +277,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "Diamond",
       };
     case "hexagon":
@@ -245,6 +291,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "Hexagon",
       };
     case "parallelogram":
@@ -258,7 +305,50 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "Parallelogram",
+      };
+    case "trapezoid":
+      return {
+        width: 150,
+        height: 90,
+        stroke: "#b91c1c",
+        fill: "#fee2e2",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "梯形",
+      };
+    case "isosceles-trapezoid":
+      return {
+        width: 150,
+        height: 90,
+        stroke: "#7c3aed",
+        fill: "#ede9fe",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "等腰梯形",
+      };
+    case "right-trapezoid":
+      return {
+        width: 150,
+        height: 90,
+        stroke: "#0f766e",
+        fill: "#ccfbf1",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "直角梯形",
       };
     case "line":
       return {
@@ -271,6 +361,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "线段",
       };
     case "perp-line":
@@ -284,6 +375,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
+        rotation: 0,
         label: "垂线",
       };
     case "rounded":
@@ -297,6 +389,7 @@ const getShapeDefaults = (type) => {
         fillOpacity: DEFAULT_STYLE.fillOpacity,
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
+        rotation: 0,
         label: "Rounded",
       };
     case "rect":
@@ -311,12 +404,19 @@ const getShapeDefaults = (type) => {
         fillOpacity: DEFAULT_STYLE.fillOpacity,
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
+        rotation: 0,
         label: "Rectangle",
       };
   }
 };
 
 const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => {
+  const rotation = shape.rotation ?? 0;
+  const centerX = shape.x + shape.width / 2;
+  const centerY = shape.y + shape.height / 2;
+  const groupProps = rotation
+    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
+    : {};
   const commonProps = {
     stroke: shape.stroke,
     fill: shape.fill,
@@ -339,7 +439,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
   switch (shape.type) {
     case "rounded":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <rect
             {...commonProps}
             x={shape.x}
@@ -359,12 +459,13 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       );
     case "circle":
       return (
-        <g key={shape.id}>
-          <circle
+        <g key={shape.id} {...groupProps}>
+          <ellipse
             {...commonProps}
             cx={shape.x + shape.width / 2}
             cy={shape.y + shape.height / 2}
-            r={shape.width / 2}
+            rx={shape.width / 2}
+            ry={shape.height / 2}
           />
           <text
             x={shape.x + shape.width / 2}
@@ -375,11 +476,74 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
           </text>
         </g>
       );
+    case "sphere":
+      return (
+        <g key={shape.id} {...groupProps}>
+          <ellipse
+            {...commonProps}
+            cx={shape.x + shape.width / 2}
+            cy={shape.y + shape.height / 2}
+            rx={shape.width / 2}
+            ry={shape.height / 2}
+          />
+          <ellipse
+            cx={shape.x + shape.width * 0.35}
+            cy={shape.y + shape.height * 0.35}
+            rx={shape.width * 0.18}
+            ry={shape.height * 0.12}
+            fill="rgba(255,255,255,0.6)"
+            stroke="none"
+            pointerEvents="none"
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    case "cylinder": {
+      const capHeight = Math.min(24, shape.height * 0.25);
+      const bodyHeight = Math.max(0, shape.height - capHeight);
+      const cx = shape.x + shape.width / 2;
+      const topY = shape.y + capHeight / 2;
+      const bottomY = shape.y + capHeight / 2 + bodyHeight;
+      return (
+        <g key={shape.id} {...groupProps}>
+          <rect
+            {...commonProps}
+            x={shape.x}
+            y={shape.y + capHeight / 2}
+            width={shape.width}
+            height={bodyHeight}
+          />
+          <ellipse
+            {...commonProps}
+            cx={cx}
+            cy={topY}
+            rx={shape.width / 2}
+            ry={capHeight / 2}
+          />
+          <ellipse
+            {...commonProps}
+            cx={cx}
+            cy={bottomY}
+            rx={shape.width / 2}
+            ry={capHeight / 2}
+          />
+          <text x={cx} y={shape.y + shape.height / 2} style={{ fontSize: shape.fontSize }}>
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
     case "diamond": {
       const centerX = shape.x + shape.width / 2;
       const centerY = shape.y + shape.height / 2;
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <polygon
             {...commonProps}
             points={`${centerX},${shape.y} ${shape.x + shape.width},${centerY} ${centerX},${
@@ -397,7 +561,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       const rightInset = shape.width - inset;
       const midY = shape.y + shape.height / 2;
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <polygon
             {...commonProps}
             points={`${shape.x + inset},${shape.y} ${shape.x + rightInset},${shape.y} ${
@@ -419,7 +583,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     case "parallelogram": {
       const skew = Math.min(32, shape.width * 0.2);
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <polygon
             {...commonProps}
             points={`${shape.x + skew},${shape.y} ${shape.x + shape.width},${shape.y} ${
@@ -438,7 +602,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     }
     case "right-triangle":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <polygon
             {...commonProps}
             points={`${shape.x},${shape.y + shape.height} ${
@@ -454,9 +618,74 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
           </text>
         </g>
       );
+    case "trapezoid": {
+      const leftInset = Math.min(40, shape.width * 0.35);
+      const rightInset = Math.min(20, shape.width * 0.15);
+      return (
+        <g key={shape.id} {...groupProps}>
+          <polygon
+            {...commonProps}
+            points={`${shape.x + leftInset},${shape.y} ${shape.x + shape.width - rightInset},${
+              shape.y
+            } ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${
+              shape.y + shape.height
+            }`}
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
+    case "isosceles-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return (
+        <g key={shape.id} {...groupProps}>
+          <polygon
+            {...commonProps}
+            points={`${shape.x + inset},${shape.y} ${shape.x + shape.width - inset},${
+              shape.y
+            } ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${
+              shape.y + shape.height
+            }`}
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
+    case "right-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return (
+        <g key={shape.id} {...groupProps}>
+          <polygon
+            {...commonProps}
+            points={`${shape.x},${shape.y} ${shape.x + shape.width - inset},${shape.y} ${
+              shape.x + shape.width
+            },${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
     case "arrow":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <line
             {...commonProps}
             x1={shape.x}
@@ -476,7 +705,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       );
     case "line":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <line
             {...commonProps}
             x1={shape.x}
@@ -495,7 +724,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       );
     case "perp-line":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <line
             {...commonProps}
             x1={shape.x}
@@ -521,7 +750,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       );
     case "sequence":
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <rect
             {...commonProps}
             x={shape.x}
@@ -551,7 +780,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     case "rect":
     default:
       return (
-        <g key={shape.id}>
+        <g key={shape.id} {...groupProps}>
           <rect
             {...commonProps}
             x={shape.x}
@@ -585,8 +814,11 @@ const DiagramCanvas = ({
   selectedId,
   dragId,
   snapGuides,
+  selectedShape,
   onSelect,
   onPointerDown,
+  onResizePointerDown,
+  onRotatePointerDown,
   onPointerMove,
   onPointerUp,
 }) => (
@@ -649,6 +881,94 @@ const DiagramCanvas = ({
         onPointerDown
       )
     )}
+    {selectedShape ? (
+      <g className="selection-layer">
+        <rect
+          className="selection-outline"
+          x={selectedShape.x}
+          y={selectedShape.y}
+          width={selectedShape.width}
+          height={selectedShape.height}
+        />
+        <line
+          className="rotation-guide"
+          x1={selectedShape.x + selectedShape.width / 2}
+          y1={selectedShape.y}
+          x2={selectedShape.x + selectedShape.width / 2}
+          y2={selectedShape.y - 28}
+        />
+        <circle
+          className="rotation-handle"
+          cx={selectedShape.x + selectedShape.width / 2}
+          cy={selectedShape.y - 28}
+          r="6"
+          onPointerDown={(event) => onRotatePointerDown(event, selectedShape)}
+        />
+        {[
+          {
+            id: "nw",
+            x: selectedShape.x,
+            y: selectedShape.y,
+            cursor: "nwse-resize",
+          },
+          {
+            id: "n",
+            x: selectedShape.x + selectedShape.width / 2,
+            y: selectedShape.y,
+            cursor: "ns-resize",
+          },
+          {
+            id: "ne",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y,
+            cursor: "nesw-resize",
+          },
+          {
+            id: "e",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y + selectedShape.height / 2,
+            cursor: "ew-resize",
+          },
+          {
+            id: "se",
+            x: selectedShape.x + selectedShape.width,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "nwse-resize",
+          },
+          {
+            id: "s",
+            x: selectedShape.x + selectedShape.width / 2,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "ns-resize",
+          },
+          {
+            id: "sw",
+            x: selectedShape.x,
+            y: selectedShape.y + selectedShape.height,
+            cursor: "nesw-resize",
+          },
+          {
+            id: "w",
+            x: selectedShape.x,
+            y: selectedShape.y + selectedShape.height / 2,
+            cursor: "ew-resize",
+          },
+        ].map((handle) => (
+          <rect
+            key={handle.id}
+            className="selection-handle"
+            x={handle.x - 5}
+            y={handle.y - 5}
+            width="10"
+            height="10"
+            style={{ cursor: handle.cursor }}
+            onPointerDown={(event) =>
+              onResizePointerDown(event, selectedShape, handle.id)
+            }
+          />
+        ))}
+      </g>
+    ) : null}
   </svg>
 );
 
@@ -766,6 +1086,7 @@ export default function App() {
     const { x, y } = getPointerPosition(event);
     dragState.current = {
       id: shape.id,
+      mode: "move",
       offsetX: x - shape.x,
       offsetY: y - shape.y,
     };
@@ -773,18 +1094,100 @@ export default function App() {
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
+  const handleResizePointerDown = (event, shape, handle) => {
+    const { x, y } = getPointerPosition(event);
+    dragState.current = {
+      id: shape.id,
+      mode: "resize",
+      handle,
+      originX: x,
+      originY: y,
+      startX: shape.x,
+      startY: shape.y,
+      startWidth: shape.width,
+      startHeight: shape.height,
+    };
+    setSelectedId(shape.id);
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handleRotatePointerDown = (event, shape) => {
+    const { x, y } = getPointerPosition(event);
+    const centerX = shape.x + shape.width / 2;
+    const centerY = shape.y + shape.height / 2;
+    const startPointerAngle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+    dragState.current = {
+      id: shape.id,
+      mode: "rotate",
+      centerX,
+      centerY,
+      startPointerAngle,
+      startAngle: shape.rotation ?? 0,
+    };
+    setSelectedId(shape.id);
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
   const handlePointerMove = (event) => {
     if (!dragState.current) {
       return;
     }
+    const drag = dragState.current;
     const { x, y } = getPointerPosition(event);
     setShapes((prev) =>
       prev.map((shape) => {
-        if (shape.id !== dragState.current?.id) {
+        if (shape.id !== drag.id) {
           return shape;
         }
-        const nextX = x - dragState.current.offsetX;
-        const nextY = y - dragState.current.offsetY;
+        if (drag.mode === "resize") {
+          const dx = x - drag.originX;
+          const dy = y - drag.originY;
+          const minWidth = 20;
+          const minHeight = ["line", "arrow"].includes(shape.type) ? 0 : 20;
+          const maxWidth = 400;
+          const maxHeight = 300;
+          let nextWidth = drag.startWidth;
+          let nextHeight = drag.startHeight;
+          let nextX = drag.startX;
+          let nextY = drag.startY;
+          if (drag.handle.includes("e")) {
+            nextWidth = clampNumber(drag.startWidth + dx, minWidth, maxWidth);
+          }
+          if (drag.handle.includes("s")) {
+            nextHeight = clampNumber(drag.startHeight + dy, minHeight, maxHeight);
+          }
+          if (drag.handle.includes("w")) {
+            nextWidth = clampNumber(drag.startWidth - dx, minWidth, maxWidth);
+            nextX = drag.startX + (drag.startWidth - nextWidth);
+          }
+          if (drag.handle.includes("n")) {
+            nextHeight = clampNumber(drag.startHeight - dy, minHeight, maxHeight);
+            nextY = drag.startY + (drag.startHeight - nextHeight);
+          }
+          setSnapGuides([]);
+          return {
+            ...shape,
+            x: clampNumber(nextX, 0, 1000 - nextWidth),
+            y: clampNumber(nextY, 0, 700 - nextHeight),
+            width: nextWidth,
+            height: nextHeight,
+          };
+        }
+        if (drag.mode === "rotate") {
+          const angle = Math.atan2(y - drag.centerY, x - drag.centerX) * (180 / Math.PI);
+          const nextRotation = drag.startAngle + (angle - drag.startPointerAngle);
+          const normalizedRotation =
+            ((((nextRotation + 180) % 360) + 360) % 360) - 180;
+          setSnapGuides([]);
+          return {
+            ...shape,
+            rotation: Math.round(normalizedRotation),
+          };
+        }
+        const nextX = x - drag.offsetX;
+        const nextY = y - drag.offsetY;
         const maxX = 1000 - shape.width;
         const maxY = 700 - shape.height;
         const { x: snappedX, y: snappedY, guides } = getSnapResult(
@@ -830,8 +1233,13 @@ export default function App() {
               type="button"
               key={tool.id}
               onClick={() => handleAddShape(tool.id)}
+              aria-label={tool.label}
+              title={tool.label}
             >
-              {tool.label}
+              <span className="tool-icon" aria-hidden="true">
+                {tool.icon}
+              </span>
+              <span className="sr-only">{tool.label}</span>
             </button>
           ))}
         </div>
@@ -874,8 +1282,11 @@ export default function App() {
             selectedId={selectedId}
             dragId={dragState.current?.id}
             snapGuides={snapGuides}
+            selectedShape={selectedShape}
             onSelect={setSelectedId}
             onPointerDown={handlePointerDown}
+            onResizePointerDown={handleResizePointerDown}
+            onRotatePointerDown={handleRotatePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           />
@@ -1040,6 +1451,19 @@ export default function App() {
                     }
                   />
                 </div>
+              </div>
+              <div className="property-row">
+                <label htmlFor="shape-rotation">Rotation</label>
+                <input
+                  id="shape-rotation"
+                  type="number"
+                  min="-180"
+                  max="180"
+                  value={selectedShape.rotation ?? 0}
+                  onChange={(event) =>
+                    updateNumericField("rotation", event.target.value, -180, 180)
+                  }
+                />
               </div>
             </div>
           ) : (
