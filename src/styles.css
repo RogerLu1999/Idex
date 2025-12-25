@@ -152,6 +152,25 @@ body {
   justify-content: space-between;
   font-weight: 600;
   color: #475569;
+  align-items: center;
+}
+
+.canvas-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.grid-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.grid-toggle input {
+  accent-color: #2563eb;
 }
 
 .status {
@@ -173,8 +192,7 @@ body {
 }
 
 .canvas-grid {
-  fill: url(#grid);
-  stroke: #e2e8f0;
+  fill: none;
 }
 
 .shape {
@@ -230,6 +248,30 @@ svg text {
   pointer-events: none;
 }
 
+.vertex-label rect {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 1;
+}
+
+.vertex-label {
+  pointer-events: all;
+  cursor: grab;
+}
+
+.vertex-label text {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.vertex-handle {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  pointer-events: all;
+  cursor: grab;
+}
+
 .inspector .properties {
   display: grid;
   gap: 12px;
@@ -257,6 +299,11 @@ svg text {
   background: #ffffff;
 }
 
+.property-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+
 .snap-guide {
   stroke: #38bdf8;
   stroke-width: 1.5;
@@ -267,6 +314,44 @@ svg text {
 .property-row.split {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.angle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vertex-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.vertex-label-row button {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.vertex-label-row button:hover {
+  background: #1d4ed8;
+}
+
+.vertex-label-inputs {
+  display: grid;
+  gap: 8px;
+}
+
+.helper-text {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
 .inspector-footer {

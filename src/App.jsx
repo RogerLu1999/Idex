@@ -16,6 +16,7 @@ const TOOL_ITEMS = [
   { id: "isosceles-trapezoid", label: "Isosceles Trapezoid", icon: "⏥" },
   { id: "right-trapezoid", label: "Right Trapezoid", icon: "⏢" },
   { id: "right-triangle", label: "Right Triangle", icon: "◿" },
+  { id: "triangle", label: "Triangle", icon: "▲" },
   { id: "line", label: "Line", icon: "➖" },
   { id: "perp-line", label: "Perpendicular", icon: "⟂" },
 ];
@@ -30,7 +31,7 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#2f5bea",
     fill: "#e8efff",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
     fontSize: 12,
@@ -47,7 +48,7 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#2f5bea",
     fill: "#e8efff",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
     fontSize: 12,
@@ -64,7 +65,7 @@ const INITIAL_SHAPES = [
     height: 0,
     stroke: "#1f2933",
     fill: "transparent",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
     fontSize: 12,
@@ -81,7 +82,7 @@ const INITIAL_SHAPES = [
     height: 180,
     stroke: "#111827",
     fill: "#f8fafc",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "8 6",
     fillOpacity: 1,
     fontSize: 12,
@@ -98,7 +99,7 @@ const INITIAL_SHAPES = [
     height: 180,
     stroke: "#111827",
     fill: "#f8fafc",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "8 6",
     fillOpacity: 1,
     fontSize: 12,
@@ -115,7 +116,7 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#0f766e",
     fill: "#ccfbf1",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
     fontSize: 12,
@@ -132,7 +133,7 @@ const INITIAL_SHAPES = [
     height: 100,
     stroke: "#7c2d12",
     fill: "#ffedd5",
-    strokeWidth: 2,
+    strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
     fontSize: 12,
@@ -145,7 +146,7 @@ const INITIAL_SHAPES = [
 const DEFAULT_STYLE = {
   stroke: "#2563eb",
   fill: "#e0f2fe",
-  strokeWidth: 2,
+  strokeWidth: 1,
   dash: "solid",
   fillOpacity: 1,
   fontSize: 12,
@@ -174,13 +175,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#2f5bea",
         fill: "#e8efff",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 10,
         rotation: 0,
-        label: "New Component",
+        label: "",
       };
     case "sequence":
       return {
@@ -188,13 +189,13 @@ const getShapeDefaults = (type) => {
         height: 180,
         stroke: "#111827",
         fill: "#f8fafc",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "8 6",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 8,
         rotation: 0,
-        label: "Lifeline",
+        label: "",
       };
     case "arrow":
       return {
@@ -202,13 +203,13 @@ const getShapeDefaults = (type) => {
         height: 0,
         stroke: "#111827",
         fill: "transparent",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "call",
+        label: "",
       };
     case "right-triangle":
       return {
@@ -216,13 +217,27 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#0f766e",
         fill: "#ccfbf1",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "直角三角形",
+        label: "",
+      };
+    case "triangle":
+      return {
+        width: 140,
+        height: 110,
+        stroke: "#0f766e",
+        fill: "#ccfbf1",
+        strokeWidth: 1,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        label: "",
       };
     case "circle":
       return {
@@ -230,13 +245,13 @@ const getShapeDefaults = (type) => {
         height: 110,
         stroke: "#7c2d12",
         fill: "#ffedd5",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "圆",
+        label: "",
       };
     case "sphere":
       return {
@@ -244,13 +259,13 @@ const getShapeDefaults = (type) => {
         height: 120,
         stroke: "#1d4ed8",
         fill: "#dbeafe",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "球体",
+        label: "",
       };
     case "cylinder":
       return {
@@ -258,13 +273,13 @@ const getShapeDefaults = (type) => {
         height: 120,
         stroke: "#0f766e",
         fill: "#ccfbf1",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "圆柱体",
+        label: "",
       };
     case "diamond":
       return {
@@ -272,13 +287,13 @@ const getShapeDefaults = (type) => {
         height: 100,
         stroke: "#6d28d9",
         fill: "#ede9fe",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "Diamond",
+        label: "",
       };
     case "hexagon":
       return {
@@ -286,13 +301,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#b45309",
         fill: "#fef3c7",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "Hexagon",
+        label: "",
       };
     case "parallelogram":
       return {
@@ -300,13 +315,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#0f766e",
         fill: "#ccfbf1",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "Parallelogram",
+        label: "",
       };
     case "trapezoid":
       return {
@@ -314,13 +329,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#b91c1c",
         fill: "#fee2e2",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "梯形",
+        label: "",
       };
     case "isosceles-trapezoid":
       return {
@@ -328,13 +343,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#7c3aed",
         fill: "#ede9fe",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "等腰梯形",
+        label: "",
       };
     case "right-trapezoid":
       return {
@@ -342,13 +357,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#0f766e",
         fill: "#ccfbf1",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "直角梯形",
+        label: "",
       };
     case "line":
       return {
@@ -356,13 +371,13 @@ const getShapeDefaults = (type) => {
         height: 0,
         stroke: "#1f2933",
         fill: "transparent",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "线段",
+        label: "",
       };
     case "perp-line":
       return {
@@ -370,13 +385,13 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#1f2933",
         fill: "transparent",
-        strokeWidth: 2,
+        strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
-        label: "垂线",
+        label: "",
       };
     case "rounded":
       return {
@@ -390,7 +405,7 @@ const getShapeDefaults = (type) => {
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
         rotation: 0,
-        label: "Rounded",
+        label: "",
       };
     case "rect":
     default:
@@ -405,7 +420,7 @@ const getShapeDefaults = (type) => {
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
         rotation: 0,
-        label: "Rectangle",
+        label: "",
       };
   }
 };
@@ -618,6 +633,23 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
           </text>
         </g>
       );
+    case "triangle": {
+      const points = (shape.points ?? [])
+        .map((point) => `${point.x},${point.y}`)
+        .join(" ");
+      return (
+        <g key={shape.id} {...groupProps}>
+          <polygon {...commonProps} points={points} />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
     case "trapezoid": {
       const leftInset = Math.min(40, shape.width * 0.35);
       const rightInset = Math.min(20, shape.width * 0.15);
@@ -809,16 +841,204 @@ const clampNumber = (value, min, max) => {
   return Math.min(Math.max(numberValue, min), max);
 };
 
+const TRIANGLE_MIN_ANGLE = 10;
+const TRIANGLE_MAX_ANGLE = 170;
+const TRIANGLE_ANGLE_SUM = 180;
+const VERTEX_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+const clampAngle = (value) =>
+  clampNumber(value, TRIANGLE_MIN_ANGLE, TRIANGLE_MAX_ANGLE);
+
+const normalizeTriangleAngles = (angles, changedIndex) => {
+  const nextAngles = [...angles].map(clampAngle);
+  const remaining = TRIANGLE_ANGLE_SUM - nextAngles[changedIndex];
+  const otherIndices = [0, 1, 2].filter((index) => index !== changedIndex);
+  const remainingSafe = Math.max(remaining, TRIANGLE_MIN_ANGLE * 2);
+  nextAngles[changedIndex] = TRIANGLE_ANGLE_SUM - remainingSafe;
+  const previousTotal =
+    angles[otherIndices[0]] + angles[otherIndices[1]] || TRIANGLE_ANGLE_SUM - 1;
+  let firstShare = remainingSafe * (angles[otherIndices[0]] / previousTotal);
+  firstShare = clampNumber(firstShare, TRIANGLE_MIN_ANGLE, remainingSafe - TRIANGLE_MIN_ANGLE);
+  const secondShare = remainingSafe - firstShare;
+  nextAngles[otherIndices[0]] = firstShare;
+  nextAngles[otherIndices[1]] = secondShare;
+  return nextAngles;
+};
+
+const getTriangleMetricsFromAngles = (baseLength, angles) => {
+  const [angleA, angleB] = angles;
+  const tanA = Math.tan((angleA * Math.PI) / 180);
+  const tanB = Math.tan((angleB * Math.PI) / 180);
+  const safeSum = tanA + tanB || 0.001;
+  const apexX = (baseLength * tanB) / safeSum;
+  const height = apexX * tanA;
+  return {
+    apexX,
+    height: Math.max(height, 20),
+  };
+};
+
+const buildTrianglePoints = ({ x, y, width }, angles) => {
+  const normalizedAngles = normalizeTriangleAngles(angles, 0);
+  const { apexX, height } = getTriangleMetricsFromAngles(width, normalizedAngles);
+  const baseY = y + height;
+  return {
+    points: [
+      { x, y: baseY },
+      { x: x + width, y: baseY },
+      { x: x + apexX, y: baseY - height },
+    ],
+    height,
+    angles: normalizedAngles,
+  };
+};
+
+const getTriangleBounds = (points) => {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+};
+
+const getTriangleAnglesFromPoints = (points) => {
+  if (points.length !== 3) {
+    return [60, 60, 60];
+  }
+  const distance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const [a, b, c] = points;
+  const sideA = distance(b, c);
+  const sideB = distance(a, c);
+  const sideC = distance(a, b);
+  const angleFromSides = (side1, side2, opposite) => {
+    const cosValue = (side1 ** 2 + side2 ** 2 - opposite ** 2) / (2 * side1 * side2);
+    const safeCos = clampNumber(cosValue, -1, 1);
+    return (Math.acos(safeCos) * 180) / Math.PI;
+  };
+  const angleA = angleFromSides(sideB, sideC, sideA);
+  const angleB = angleFromSides(sideA, sideC, sideB);
+  const angleC = TRIANGLE_ANGLE_SUM - angleA - angleB;
+  return [angleA, angleB, angleC];
+};
+
+const getShapeVertices = (shape) => {
+  switch (shape.type) {
+    case "triangle":
+      return shape.points ?? [];
+    case "right-triangle":
+      return [
+        { x: shape.x, y: shape.y + shape.height },
+        { x: shape.x + shape.width, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y },
+      ];
+    case "diamond": {
+      const centerX = shape.x + shape.width / 2;
+      const centerY = shape.y + shape.height / 2;
+      return [
+        { x: centerX, y: shape.y },
+        { x: shape.x + shape.width, y: centerY },
+        { x: centerX, y: shape.y + shape.height },
+        { x: shape.x, y: centerY },
+      ];
+    }
+    case "hexagon": {
+      const inset = shape.width * 0.25;
+      const rightInset = shape.width - inset;
+      const midY = shape.y + shape.height / 2;
+      return [
+        { x: shape.x + inset, y: shape.y },
+        { x: shape.x + rightInset, y: shape.y },
+        { x: shape.x + shape.width, y: midY },
+        { x: shape.x + rightInset, y: shape.y + shape.height },
+        { x: shape.x + inset, y: shape.y + shape.height },
+        { x: shape.x, y: midY },
+      ];
+    }
+    case "parallelogram": {
+      const skew = Math.min(32, shape.width * 0.2);
+      return [
+        { x: shape.x + skew, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y },
+        { x: shape.x + shape.width - skew, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y + shape.height },
+      ];
+    }
+    case "trapezoid": {
+      const leftInset = Math.min(40, shape.width * 0.35);
+      const rightInset = Math.min(20, shape.width * 0.15);
+      return [
+        { x: shape.x + leftInset, y: shape.y },
+        { x: shape.x + shape.width - rightInset, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y + shape.height },
+      ];
+    }
+    case "isosceles-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return [
+        { x: shape.x + inset, y: shape.y },
+        { x: shape.x + shape.width - inset, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y + shape.height },
+      ];
+    }
+    case "right-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return [
+        { x: shape.x, y: shape.y },
+        { x: shape.x + shape.width - inset, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y + shape.height },
+      ];
+    }
+    case "line":
+    case "arrow":
+      return [
+        { x: shape.x, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y },
+      ];
+    case "circle":
+    case "sphere":
+    case "cylinder":
+      return [];
+    default:
+      return [
+        { x: shape.x, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y },
+        { x: shape.x + shape.width, y: shape.y + shape.height },
+        { x: shape.x, y: shape.y + shape.height },
+      ];
+  }
+};
+
+const createVertexLabels = (shape) =>
+  getShapeVertices(shape).map((vertex, index) => ({
+    id: `${shape.id}-label-${index}`,
+    text: VERTEX_LETTERS[index] ?? `P${index + 1}`,
+    x: vertex.x + 10,
+    y: vertex.y - 12,
+  }));
+
 const DiagramCanvas = ({
   shapes,
   selectedId,
   dragId,
   snapGuides,
   selectedShape,
+  showGrid,
   onSelect,
   onPointerDown,
   onResizePointerDown,
   onRotatePointerDown,
+  onVertexPointerDown,
+  onLabelPointerDown,
   onPointerMove,
   onPointerUp,
 }) => (
@@ -850,7 +1070,15 @@ const DiagramCanvas = ({
         <path d="M0,0 L12,6 L0,12 z" fill="context-stroke" />
       </marker>
     </defs>
-    <rect className="canvas-grid" x="0" y="0" width="1000" height="700" />
+    <rect
+      className="canvas-grid"
+      x="0"
+      y="0"
+      width="1000"
+      height="700"
+      fill={showGrid ? "url(#grid)" : "#ffffff"}
+      stroke={showGrid ? "#e2e8f0" : "none"}
+    />
     {snapGuides.map((guide) =>
       guide.axis === "x" ? (
         <line
@@ -880,6 +1108,20 @@ const DiagramCanvas = ({
         onSelect,
         onPointerDown
       )
+    )}
+    {shapes.flatMap((shape) =>
+      (shape.vertexLabels ?? []).map((label) => (
+        <g
+          key={label.id}
+          className="vertex-label"
+          onPointerDown={(event) => onLabelPointerDown(event, shape, label.id)}
+        >
+          <rect x={label.x - 12} y={label.y - 12} width="24" height="20" rx="6" />
+          <text x={label.x} y={label.y - 2}>
+            {label.text}
+          </text>
+        </g>
+      ))
     )}
     {selectedShape ? (
       <g className="selection-layer">
@@ -967,6 +1209,20 @@ const DiagramCanvas = ({
             }
           />
         ))}
+        {selectedShape.type === "triangle"
+          ? (selectedShape.points ?? []).map((point, index) => (
+              <circle
+                key={`vertex-${index}`}
+                className="vertex-handle"
+                cx={point.x}
+                cy={point.y}
+                r="6"
+                onPointerDown={(event) =>
+                  onVertexPointerDown(event, selectedShape, index)
+                }
+              />
+            ))
+          : null}
       </g>
     ) : null}
   </svg>
@@ -1030,6 +1286,7 @@ export default function App() {
   const [shapes, setShapes] = useState(INITIAL_SHAPES);
   const [selectedId, setSelectedId] = useState(shapes[0]?.id ?? null);
   const [snapGuides, setSnapGuides] = useState([]);
+  const [showGrid, setShowGrid] = useState(true);
   const dragState = useRef(null);
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
@@ -1039,13 +1296,28 @@ export default function App() {
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
     const defaults = getShapeDefaults(type);
-    const newShape = {
+    const baseX = 120 + (nextIndex % 5) * 160;
+    const baseY = 120 + Math.floor(nextIndex / 5) * 120;
+    let newShape = {
       id: `shape-${nextIndex}`,
       type,
-      x: 120 + (nextIndex % 5) * 160,
-      y: 120 + Math.floor(nextIndex / 5) * 120,
+      x: baseX,
+      y: baseY,
       ...defaults,
     };
+    if (type === "triangle") {
+      const initialAngles = [50, 60, 70];
+      const { points, height, angles } = buildTrianglePoints(
+        { x: baseX, y: baseY, width: defaults.width },
+        initialAngles
+      );
+      newShape = {
+        ...newShape,
+        height,
+        points,
+        angles,
+      };
+    }
     setShapes((prev) => [...prev, newShape]);
     setSelectedId(newShape.id);
   };
@@ -1057,10 +1329,59 @@ export default function App() {
     setShapes((prev) =>
       prev.map((shape) =>
         shape.id === selectedShape.id
-          ? {
-              ...shape,
-              [field]: value,
-            }
+          ? (() => {
+              if (shape.type === "triangle" && shape.points) {
+                if (field === "x" || field === "y") {
+                  const delta = value - shape[field];
+                  const movedPoints = shape.points.map((point) => ({
+                    x: field === "x" ? point.x + delta : point.x,
+                    y: field === "y" ? point.y + delta : point.y,
+                  }));
+                  const movedLabels = shape.vertexLabels
+                    ? shape.vertexLabels.map((label) => ({
+                        ...label,
+                        x: field === "x" ? label.x + delta : label.x,
+                        y: field === "y" ? label.y + delta : label.y,
+                      }))
+                    : shape.vertexLabels;
+                  return {
+                    ...shape,
+                    [field]: value,
+                    points: movedPoints,
+                    vertexLabels: movedLabels,
+                  };
+                }
+                if (field === "width" || field === "height") {
+                  const nextWidth = field === "width" ? value : shape.width;
+                  const nextHeight = field === "height" ? value : shape.height;
+                  const scaleX = shape.width ? nextWidth / shape.width : 1;
+                  const scaleY = shape.height ? nextHeight / shape.height : 1;
+                  const nextPoints = shape.points.map((point) => ({
+                    x: shape.x + (point.x - shape.x) * scaleX,
+                    y: shape.y + (point.y - shape.y) * scaleY,
+                  }));
+                  const nextLabels = shape.vertexLabels
+                    ? shape.vertexLabels.map((label) => ({
+                        ...label,
+                        x: shape.x + (label.x - shape.x) * scaleX,
+                        y: shape.y + (label.y - shape.y) * scaleY,
+                      }))
+                    : shape.vertexLabels;
+                  return {
+                    ...shape,
+                    width: nextWidth,
+                    height: nextHeight,
+                    points: nextPoints,
+                    angles: getTriangleAnglesFromPoints(nextPoints),
+                    vertexLabels: nextLabels,
+                  };
+                }
+              }
+              return {
+                ...shape,
+                [field]: value,
+              };
+            })()
           : shape
       )
     );
@@ -1068,6 +1389,72 @@ export default function App() {
 
   const updateNumericField = (field, value, min, max) => {
     updateShape(field, clampNumber(value, min, max));
+  };
+
+  const updateTriangleAngle = (index, value) => {
+    if (!selectedShape || selectedShape.type !== "triangle") {
+      return;
+    }
+    const currentAngles = selectedShape.angles ?? [60, 60, 60];
+    const nextAngles = [...currentAngles];
+    nextAngles[index] = clampAngle(value);
+    const normalizedAngles = normalizeTriangleAngles(nextAngles, index);
+    const baseWidth = selectedShape.width;
+    const baseY = selectedShape.y + selectedShape.height;
+    const { apexX, height } = getTriangleMetricsFromAngles(baseWidth, normalizedAngles);
+    const nextPoints = [
+      { x: selectedShape.x, y: baseY },
+      { x: selectedShape.x + baseWidth, y: baseY },
+      { x: selectedShape.x + apexX, y: baseY - height },
+    ];
+    setShapes((prev) =>
+      prev.map((shape) =>
+        shape.id === selectedShape.id
+          ? {
+              ...shape,
+              points: nextPoints,
+              angles: normalizedAngles,
+              height,
+              y: baseY - height,
+            }
+          : shape
+      )
+    );
+  };
+
+  const handleAddVertexLabels = () => {
+    if (!selectedShape) {
+      return;
+    }
+    const labels = createVertexLabels(selectedShape);
+    setShapes((prev) =>
+      prev.map((shape) =>
+        shape.id === selectedShape.id
+          ? {
+              ...shape,
+              vertexLabels: labels,
+            }
+          : shape
+      )
+    );
+  };
+
+  const updateVertexLabel = (labelId, text) => {
+    if (!selectedShape) {
+      return;
+    }
+    setShapes((prev) =>
+      prev.map((shape) =>
+        shape.id === selectedShape.id
+          ? {
+              ...shape,
+              vertexLabels: (shape.vertexLabels ?? []).map((label) =>
+                label.id === labelId ? { ...label, text } : label
+              ),
+            }
+          : shape
+      )
+    );
   };
 
   const getPointerPosition = (event) => {
@@ -1106,6 +1493,8 @@ export default function App() {
       startY: shape.y,
       startWidth: shape.width,
       startHeight: shape.height,
+      startPoints: shape.points ? [...shape.points] : null,
+      startLabels: shape.vertexLabels ? [...shape.vertexLabels] : null,
     };
     setSelectedId(shape.id);
     event.stopPropagation();
@@ -1130,6 +1519,35 @@ export default function App() {
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
+  const handleVertexPointerDown = (event, shape, vertexIndex) => {
+    dragState.current = {
+      id: shape.id,
+      mode: "vertex",
+      vertexIndex,
+    };
+    setSelectedId(shape.id);
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handleLabelPointerDown = (event, shape, labelId) => {
+    const { x, y } = getPointerPosition(event);
+    const label = (shape.vertexLabels ?? []).find((item) => item.id === labelId);
+    if (!label) {
+      return;
+    }
+    dragState.current = {
+      id: shape.id,
+      mode: "label",
+      labelId,
+      offsetX: x - label.x,
+      offsetY: y - label.y,
+    };
+    setSelectedId(shape.id);
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
   const handlePointerMove = (event) => {
     if (!dragState.current) {
       return;
@@ -1140,6 +1558,37 @@ export default function App() {
       prev.map((shape) => {
         if (shape.id !== drag.id) {
           return shape;
+        }
+        if (drag.mode === "vertex" && shape.type === "triangle") {
+          const nextPoints = (shape.points ?? []).map((point, index) =>
+            index === drag.vertexIndex
+              ? {
+                  x: clampNumber(x, 0, 1000),
+                  y: clampNumber(y, 0, 700),
+                }
+              : point
+          );
+          const bounds = getTriangleBounds(nextPoints);
+          return {
+            ...shape,
+            ...bounds,
+            points: nextPoints,
+            angles: getTriangleAnglesFromPoints(nextPoints),
+          };
+        }
+        if (drag.mode === "label") {
+          return {
+            ...shape,
+            vertexLabels: (shape.vertexLabels ?? []).map((label) =>
+              label.id === drag.labelId
+                ? {
+                    ...label,
+                    x: clampNumber(x - drag.offsetX, 0, 1000),
+                    y: clampNumber(y - drag.offsetY, 0, 700),
+                  }
+                : label
+            ),
+          };
         }
         if (drag.mode === "resize") {
           const dx = x - drag.originX;
@@ -1167,12 +1616,40 @@ export default function App() {
             nextY = drag.startY + (drag.startHeight - nextHeight);
           }
           setSnapGuides([]);
+          const clampedX = clampNumber(nextX, 0, 1000 - nextWidth);
+          const clampedY = clampNumber(nextY, 0, 700 - nextHeight);
+          const scaleX = drag.startWidth ? nextWidth / drag.startWidth : 1;
+          const scaleY = drag.startHeight ? nextHeight / drag.startHeight : 1;
+          const nextLabels = drag.startLabels
+            ? drag.startLabels.map((label) => ({
+                ...label,
+                x: clampedX + (label.x - drag.startX) * scaleX,
+                y: clampedY + (label.y - drag.startY) * scaleY,
+              }))
+            : shape.vertexLabels;
+          if (shape.type === "triangle" && drag.startPoints) {
+            const nextPoints = drag.startPoints.map((point) => ({
+              x: clampedX + (point.x - drag.startX) * scaleX,
+              y: clampedY + (point.y - drag.startY) * scaleY,
+            }));
+            return {
+              ...shape,
+              x: clampedX,
+              y: clampedY,
+              width: nextWidth,
+              height: nextHeight,
+              points: nextPoints,
+              angles: getTriangleAnglesFromPoints(nextPoints),
+              vertexLabels: nextLabels,
+            };
+          }
           return {
             ...shape,
-            x: clampNumber(nextX, 0, 1000 - nextWidth),
-            y: clampNumber(nextY, 0, 700 - nextHeight),
+            x: clampedX,
+            y: clampedY,
             width: nextWidth,
             height: nextHeight,
+            vertexLabels: nextLabels,
           };
         }
         if (drag.mode === "rotate") {
@@ -1197,10 +1674,33 @@ export default function App() {
           clampNumber(nextY, 0, maxY)
         );
         setSnapGuides(guides);
+        const deltaX = snappedX - shape.x;
+        const deltaY = snappedY - shape.y;
+        const movedLabels = shape.vertexLabels
+          ? shape.vertexLabels.map((label) => ({
+              ...label,
+              x: label.x + deltaX,
+              y: label.y + deltaY,
+            }))
+          : shape.vertexLabels;
+        if (shape.type === "triangle" && shape.points) {
+          const movedPoints = shape.points.map((point) => ({
+            x: point.x + deltaX,
+            y: point.y + deltaY,
+          }));
+          return {
+            ...shape,
+            x: snappedX,
+            y: snappedY,
+            points: movedPoints,
+            vertexLabels: movedLabels,
+          };
+        }
         return {
           ...shape,
           x: snappedX,
           y: snappedY,
+          vertexLabels: movedLabels,
         };
       })
     );
@@ -1219,6 +1719,12 @@ export default function App() {
 
   const supportsCornerRadius = ["component", "rect", "rounded", "sequence"].includes(selectedShape?.type);
   const supportsFill = selectedShape?.fill !== "transparent";
+  const vertexCandidates = selectedShape ? getShapeVertices(selectedShape) : [];
+  const hasVertices = vertexCandidates.length >= 2;
+  const triangleAngles =
+    selectedShape?.type === "triangle"
+      ? selectedShape.angles ?? getTriangleAnglesFromPoints(selectedShape.points ?? [])
+      : null;
 
   return (
     <div className="app">
@@ -1275,7 +1781,17 @@ export default function App() {
         <main className="canvas-wrapper">
           <div className="canvas-header">
             <span>Default Workspace</span>
-            <span className="status">Auto-save enabled</span>
+            <div className="canvas-controls">
+              <label className="grid-toggle">
+                <input
+                  type="checkbox"
+                  checked={showGrid}
+                  onChange={(event) => setShowGrid(event.target.checked)}
+                />
+                <span>Grid</span>
+              </label>
+              <span className="status">Auto-save enabled</span>
+            </div>
           </div>
           <DiagramCanvas
             shapes={shapes}
@@ -1283,10 +1799,13 @@ export default function App() {
             dragId={dragState.current?.id}
             snapGuides={snapGuides}
             selectedShape={selectedShape}
+            showGrid={showGrid}
             onSelect={setSelectedId}
             onPointerDown={handlePointerDown}
             onResizePointerDown={handleResizePointerDown}
             onRotatePointerDown={handleRotatePointerDown}
+            onVertexPointerDown={handleVertexPointerDown}
+            onLabelPointerDown={handleLabelPointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           />
@@ -1465,6 +1984,60 @@ export default function App() {
                   }
                 />
               </div>
+              {selectedShape.type === "triangle" && triangleAngles ? (
+                <div className="property-row">
+                  <span className="property-label">Triangle angles</span>
+                  <div className="angle-grid">
+                    {triangleAngles.map((angle, index) => (
+                      <div key={`angle-${index}`}>
+                        <label htmlFor={`triangle-angle-${index}`}>
+                          {`Angle ${VERTEX_LETTERS[index]}`}
+                        </label>
+                        <input
+                          id={`triangle-angle-${index}`}
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={Math.round(angle)}
+                          onChange={(event) =>
+                            updateTriangleAngle(index, event.target.value)
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {hasVertices ? (
+                <div className="property-row">
+                  <div className="vertex-label-row">
+                    <span>Vertex labels</span>
+                    <button type="button" onClick={handleAddVertexLabels}>
+                      Auto label
+                    </button>
+                  </div>
+                  {(selectedShape.vertexLabels ?? []).length > 0 ? (
+                    <div className="vertex-label-inputs">
+                      {(selectedShape.vertexLabels ?? []).map((label, index) => (
+                        <div key={label.id}>
+                          <label htmlFor={`vertex-label-${label.id}`}>
+                            {`Label ${index + 1}`}
+                          </label>
+                          <input
+                            id={`vertex-label-${label.id}`}
+                            value={label.text}
+                            onChange={(event) =>
+                              updateVertexLabel(label.id, event.target.value)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="helper-text">Create draggable labels for each vertex.</p>
+                  )}
+                </div>
+              ) : null}
             </div>
           ) : (
             <p>Select a shape to customize it.</p>
