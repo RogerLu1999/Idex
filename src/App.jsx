@@ -19,6 +19,7 @@ const TOOL_ITEMS = [
   { id: "triangle", label: "Triangle", icon: "▲" },
   { id: "line", label: "Line", icon: "➖" },
   { id: "perp-line", label: "Perpendicular", icon: "⟂" },
+  { id: "perp-marker", label: "Perpendicular Marker", icon: "⊥" },
 ];
 
 const INITIAL_SHAPES = [
@@ -211,6 +212,7 @@ const getShapeDefaults = (type) => {
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        rotationAnchor: "start",
         fillEffect: "solid",
         label: "",
       };
@@ -391,6 +393,7 @@ const getShapeDefaults = (type) => {
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        rotationAnchor: "start",
         fillEffect: "solid",
         label: "",
       };
@@ -401,6 +404,21 @@ const getShapeDefaults = (type) => {
         stroke: DEFAULT_STYLE.stroke,
         fill: "transparent",
         strokeWidth: 1,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        fillEffect: "solid",
+        label: "",
+      };
+    case "perp-marker":
+      return {
+        width: 28,
+        height: 28,
+        stroke: DEFAULT_STYLE.stroke,
+        fill: "transparent",
+        strokeWidth: 2,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
@@ -530,10 +548,49 @@ const FILL_EFFECTS = [
   { id: "shadow", label: "Shadow", value: "shadow" },
 ];
 
+const normalizeRotation = (rotation) =>
+  ((((rotation ?? 0) + 180) % 360) + 360) % 360 - 180;
+
+const isLineShape = (shape) => ["line", "arrow"].includes(shape.type);
+
+const getLineRotationAnchorPoint = (shape) => {
+  const anchor = shape.rotationAnchor ?? "start";
+  if (anchor === "end") {
+    return { x: shape.x + shape.width, y: shape.y };
+  }
+  return { x: shape.x, y: shape.y };
+};
+
+const getShapeRotationCenter = (shape) => {
+  if (isLineShape(shape)) {
+    return getLineRotationAnchorPoint(shape);
+  }
+  return {
+    x: shape.x + shape.width / 2,
+    y: shape.y + shape.height / 2,
+  };
+};
+
+const getLineEndpoints = (shape) => {
+  const angle = (normalizeRotation(shape.rotation) * Math.PI) / 180;
+  const anchor = getLineRotationAnchorPoint(shape);
+  const dx = Math.cos(angle) * shape.width;
+  const dy = Math.sin(angle) * shape.width;
+  if ((shape.rotationAnchor ?? "start") === "end") {
+    return {
+      start: { x: anchor.x - dx, y: anchor.y - dy },
+      end: anchor,
+    };
+  }
+  return {
+    start: anchor,
+    end: { x: anchor.x + dx, y: anchor.y + dy },
+  };
+};
+
 const renderShapePrimitive = (shape, props = {}) => {
   const rotation = shape.rotation ?? 0;
-  const centerX = shape.x + shape.width / 2;
-  const centerY = shape.y + shape.height / 2;
+  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
   const groupProps = rotation
     ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
     : {};
@@ -729,8 +786,7 @@ const renderCompoundShape = (
   onPointerDown
 ) => {
   const rotation = shape.rotation ?? 0;
-  const centerX = shape.x + shape.width / 2;
-  const centerY = shape.y + shape.height / 2;
+  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
   const groupProps = rotation
     ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
     : {};
@@ -793,8 +849,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     return renderCompoundShape(shape, isSelected, isDragging, onSelect, onPointerDown);
   }
   const rotation = shape.rotation ?? 0;
-  const centerX = shape.x + shape.width / 2;
-  const centerY = shape.y + shape.height / 2;
+  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
   const groupProps = rotation
     ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
     : {};
@@ -1170,6 +1225,32 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
           </text>
         </g>
       );
+    case "perp-marker": {
+      const startX = shape.x + shape.width * 0.25;
+      const startY = shape.y + shape.height * 0.75;
+      const midX = shape.x + shape.width * 0.75;
+      const endY = shape.y + shape.height * 0.25;
+      return (
+        <g key={shape.id} {...groupProps}>
+          <line
+            {...commonProps}
+            x1={startX}
+            y1={startY}
+            x2={midX}
+            y2={startY}
+            strokeLinecap="round"
+          />
+          <line
+            {...commonProps}
+            x1={midX}
+            y1={startY}
+            x2={midX}
+            y2={endY}
+            strokeLinecap="round"
+          />
+        </g>
+      );
+    }
     case "sequence":
       return (
         <g key={shape.id} {...groupProps}>
@@ -1642,6 +1723,7 @@ const DiagramCanvas = ({
           },
         ]
     : [];
+  const rotationCenter = selectedShape ? getShapeRotationCenter(selectedShape) : null;
 
   return (
     <svg
@@ -1748,15 +1830,15 @@ const DiagramCanvas = ({
         />
         <line
           className="rotation-guide"
-          x1={selectedShape.x + selectedShape.width / 2}
-          y1={selectedShape.y}
-          x2={selectedShape.x + selectedShape.width / 2}
-          y2={selectedShape.y - 28}
+          x1={rotationCenter?.x ?? selectedShape.x + selectedShape.width / 2}
+          y1={rotationCenter?.y ?? selectedShape.y}
+          x2={rotationCenter?.x ?? selectedShape.x + selectedShape.width / 2}
+          y2={(rotationCenter?.y ?? selectedShape.y) - 28}
         />
         <circle
           className="rotation-handle"
-          cx={selectedShape.x + selectedShape.width / 2}
-          cy={selectedShape.y - 28}
+          cx={rotationCenter?.x ?? selectedShape.x + selectedShape.width / 2}
+          cy={(rotationCenter?.y ?? selectedShape.y) - 28}
           r="6"
           onPointerDown={(event) => onRotatePointerDown(event, selectedShape)}
         />
@@ -1796,6 +1878,8 @@ const DiagramCanvas = ({
 
 const SNAP_DISTANCE = 12;
 const LINE_VERTEX_SNAP_DISTANCE = 18;
+const PERP_MARKER_VERTICAL_THRESHOLD = 4;
+const PERP_MARKER_Y_PADDING = 8;
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 700;
 const SNAP_AXES = ["x", "y"];
@@ -1894,6 +1978,49 @@ const getLineVertexSnap = (movingShape, shapes, nextX, nextY) => {
   return {
     x: nextX + bestMatch.deltaX,
     y: nextY + bestMatch.deltaY,
+  };
+};
+
+const getPerpMarkerSnap = (movingShape, shapes, nextX, nextY) => {
+  if (movingShape.type !== "perp-marker") {
+    return null;
+  }
+  const centerX = nextX + movingShape.width / 2;
+  const centerY = nextY + movingShape.height / 2;
+  const verticalLines = shapes
+    .filter((shape) => isLineShape(shape) && shape.id !== movingShape.id)
+    .map((shape) => {
+      const { start, end } = getLineEndpoints(shape);
+      const deltaX = Math.abs(end.x - start.x);
+      if (deltaX > PERP_MARKER_VERTICAL_THRESHOLD) {
+        return null;
+      }
+      const minY = Math.min(start.y, end.y) - PERP_MARKER_Y_PADDING;
+      const maxY = Math.max(start.y, end.y) + PERP_MARKER_Y_PADDING;
+      if (centerY < minY || centerY > maxY) {
+        return null;
+      }
+      return {
+        x: (start.x + end.x) / 2,
+      };
+    })
+    .filter(Boolean);
+
+  if (verticalLines.length < 2) {
+    return null;
+  }
+
+  const sorted = verticalLines.sort((a, b) => a.x - b.x);
+  const left = [...sorted].reverse().find((line) => line.x <= centerX);
+  const right = sorted.find((line) => line.x >= centerX);
+  if (!left || !right || left.x === right.x) {
+    return null;
+  }
+  const snappedCenterX = (left.x + right.x) / 2;
+  return {
+    x: snappedCenterX - movingShape.width / 2,
+    y: nextY,
+    rotation: 90,
   };
 };
 
@@ -2269,8 +2396,7 @@ export default function App() {
 
   const handleRotatePointerDown = (event, shape) => {
     const { x, y } = getPointerPosition(event);
-    const centerX = shape.x + shape.width / 2;
-    const centerY = shape.y + shape.height / 2;
+    const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
     const startPointerAngle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
     dragState.current = {
       id: shape.id,
@@ -2449,9 +2575,12 @@ export default function App() {
         const vertexSnap = getLineVertexSnap(shape, prev, snappedX, snappedY);
         const finalX = vertexSnap?.x ?? snappedX;
         const finalY = vertexSnap?.y ?? snappedY;
-        setSnapGuides(vertexSnap ? [] : guides);
-        const deltaX = finalX - shape.x;
-        const deltaY = finalY - shape.y;
+        const markerSnap = getPerpMarkerSnap(shape, prev, finalX, finalY);
+        const appliedX = markerSnap?.x ?? finalX;
+        const appliedY = markerSnap?.y ?? finalY;
+        setSnapGuides(markerSnap || vertexSnap ? [] : guides);
+        const deltaX = appliedX - shape.x;
+        const deltaY = appliedY - shape.y;
         if (shape.type === "compound") {
           return translateShape(shape, deltaX, deltaY);
         }
@@ -2469,17 +2598,18 @@ export default function App() {
           }));
           return {
             ...shape,
-            x: finalX,
-            y: finalY,
+            x: appliedX,
+            y: appliedY,
             points: movedPoints,
             vertexLabels: movedLabels,
           };
         }
         return {
           ...shape,
-          x: finalX,
-          y: finalY,
+          x: appliedX,
+          y: appliedY,
           vertexLabels: movedLabels,
+          rotation: markerSnap?.rotation ?? shape.rotation,
         };
       })
     );
@@ -2500,8 +2630,9 @@ export default function App() {
     selectedShape?.type
   );
   const supportsFill = selectedShape
-    ? !["line", "arrow", "perp-line"].includes(selectedShape.type)
+    ? !["line", "arrow", "perp-line", "perp-marker"].includes(selectedShape.type)
     : false;
+  const supportsLineAnchor = selectedShape ? isLineShape(selectedShape) : false;
   const isTransparentFill = selectedShape?.fill === "transparent";
   const vertexCandidates = selectedShape ? getShapeVertices(selectedShape) : [];
   const hasVertices = vertexCandidates.length >= 2;
@@ -2736,16 +2867,23 @@ export default function App() {
                     <div className="diagram-actions">
                       <button
                         type="button"
+                        className="diagram-icon-button"
                         onClick={() => handleRenameDiagram(diagram.id)}
+                        aria-label={`Rename ${diagram.name}`}
+                        title="Rename"
                       >
-                        Rename
+                        <span aria-hidden="true">✏️</span>
+                        <span className="sr-only">Rename</span>
                       </button>
                       <button
                         type="button"
-                        className="danger"
+                        className="diagram-icon-button danger"
                         onClick={() => handleDeleteDiagram(diagram.id)}
+                        aria-label={`Delete ${diagram.name}`}
+                        title="Delete"
                       >
-                        Delete
+                        <span aria-hidden="true">🗑️</span>
+                        <span className="sr-only">Delete</span>
                       </button>
                     </div>
                   </div>
@@ -3020,6 +3158,19 @@ export default function App() {
                   }
                 />
               </div>
+              {supportsLineAnchor ? (
+                <div className="property-row">
+                  <label htmlFor="shape-rotation-anchor">Rotation pivot</label>
+                  <select
+                    id="shape-rotation-anchor"
+                    value={selectedShape.rotationAnchor ?? "start"}
+                    onChange={(event) => updateShape("rotationAnchor", event.target.value)}
+                  >
+                    <option value="start">Left endpoint</option>
+                    <option value="end">Right endpoint</option>
+                  </select>
+                </div>
+              ) : null}
               {selectedShape.type === "triangle" && triangleAngles ? (
                 <div className="property-row">
                   <span className="property-label">Triangle angles</span>
