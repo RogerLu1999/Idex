@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 const TOOL_ITEMS = [
   { id: "component", label: "Component Box" },
@@ -105,6 +105,12 @@ const NAV_SECTIONS = [
   { title: "Workspace", items: ["Default Canvas", "Templates", "Exports"] },
 ];
 
+const CREATE_LINKS = [
+  { id: "create-component", label: "Create component diagram" },
+  { id: "create-sequence", label: "Create sequence diagram" },
+  { id: "create-geometry", label: "Create geometry diagram" },
+];
+
 const getShapeDefaults = (type) => {
   switch (type) {
     case "component":
@@ -183,7 +189,7 @@ const getShapeDefaults = (type) => {
   }
 };
 
-const renderShape = (shape, isSelected, onSelect) => {
+const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => {
   const commonProps = {
     stroke: shape.stroke,
     fill: shape.fill,
@@ -192,7 +198,13 @@ const renderShape = (shape, isSelected, onSelect) => {
       event.stopPropagation();
       onSelect(shape.id);
     },
-    className: isSelected ? "shape selected" : "shape",
+    onPointerDown: (event) => {
+      event.stopPropagation();
+      onPointerDown(event, shape);
+    },
+    className: ["shape", isSelected ? "selected" : null, isDragging ? "dragging" : null]
+      .filter(Boolean)
+      .join(" "),
   };
 
   switch (shape.type) {
@@ -345,8 +357,15 @@ const clampNumber = (value, min, max) => {
   return Math.min(Math.max(numberValue, min), max);
 };
 
-const DiagramCanvas = ({ shapes, selectedId, onSelect }) => (
-  <svg className="canvas" viewBox="0 0 1000 700" onClick={() => onSelect(null)}>
+const DiagramCanvas = ({ shapes, selectedId, dragId, onSelect, onPointerDown, onPointerMove, onPointerUp }) => (
+  <svg
+    className="canvas"
+    viewBox="0 0 1000 700"
+    onClick={() => onSelect(null)}
+    onPointerMove={onPointerMove}
+    onPointerUp={onPointerUp}
+    onPointerLeave={onPointerUp}
+  >
     <defs>
       <pattern
         id="grid"
@@ -369,7 +388,13 @@ const DiagramCanvas = ({ shapes, selectedId, onSelect }) => (
     </defs>
     <rect className="canvas-grid" x="0" y="0" width="1000" height="700" />
     {shapes.map((shape) =>
-      renderShape(shape, shape.id === selectedId, onSelect)
+      renderShape(
+        shape,
+        shape.id === selectedId,
+        shape.id === dragId,
+        onSelect,
+        onPointerDown
+      )
     )}
   </svg>
 );
@@ -377,6 +402,7 @@ const DiagramCanvas = ({ shapes, selectedId, onSelect }) => (
 export default function App() {
   const [shapes, setShapes] = useState(INITIAL_SHAPES);
   const [selectedId, setSelectedId] = useState(shapes[0]?.id ?? null);
+  const dragState = useRef(null);
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
     [shapes, selectedId]
@@ -416,6 +442,56 @@ export default function App() {
     updateShape(field, clampNumber(value, min, max));
   };
 
+  const getPointerPosition = (event) => {
+    const svg = event.currentTarget.ownerSVGElement ?? event.currentTarget;
+    if (!svg) {
+      return { x: 0, y: 0 };
+    }
+    const rect = svg.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  };
+
+  const handlePointerDown = (event, shape) => {
+    const { x, y } = getPointerPosition(event);
+    dragState.current = {
+      id: shape.id,
+      offsetX: x - shape.x,
+      offsetY: y - shape.y,
+    };
+    setSelectedId(shape.id);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event) => {
+    if (!dragState.current) {
+      return;
+    }
+    const { x, y } = getPointerPosition(event);
+    setShapes((prev) =>
+      prev.map((shape) => {
+        if (shape.id !== dragState.current?.id) {
+          return shape;
+        }
+        const nextX = x - dragState.current.offsetX;
+        const nextY = y - dragState.current.offsetY;
+        const maxX = 1000 - shape.width;
+        const maxY = 700 - shape.height;
+        return {
+          ...shape,
+          x: clampNumber(nextX, 0, maxX),
+          y: clampNumber(nextY, 0, maxY),
+        };
+      })
+    );
+  };
+
+  const handlePointerUp = () => {
+    dragState.current = null;
+  };
+
   return (
     <div className="app">
       <header className="topbar">
@@ -439,6 +515,18 @@ export default function App() {
       <div className="workspace">
         <aside className="panel nav">
           <h2>Navigation</h2>
+          <div className="nav-group">
+            <h3>Create diagram</h3>
+            <ul className="nav-links">
+              {CREATE_LINKS.map((link) => (
+                <li key={link.id}>
+                  <a href="#" onClick={(event) => event.preventDefault()}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
           {NAV_SECTIONS.map((section) => (
             <div className="nav-group" key={section.title}>
               <h3>{section.title}</h3>
@@ -459,7 +547,11 @@ export default function App() {
           <DiagramCanvas
             shapes={shapes}
             selectedId={selectedId}
+            dragId={dragState.current?.id}
             onSelect={setSelectedId}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
           />
         </main>
 

@@ -97,6 +97,22 @@ body {
   font-size: 14px;
 }
 
+.nav-links a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  text-decoration: none;
+  color: #1d4ed8;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #eef2ff;
+}
+
+.nav-links a:hover {
+  background: #e0e7ff;
+}
+
 .nav-group li {
   padding: 8px 10px;
   border-radius: 8px;
@@ -131,6 +147,7 @@ body {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  touch-action: none;
 }
 
 .canvas-grid {
@@ -140,6 +157,10 @@ body {
 
 .shape {
   cursor: pointer;
+}
+
+.shape.dragging {
+  cursor: grabbing;
 }
 
 .shape.selected {
