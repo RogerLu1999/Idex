@@ -7,6 +7,9 @@ const TOOL_ITEMS = [
   { id: "rect", label: "Rectangle" },
   { id: "rounded", label: "Rounded Rect" },
   { id: "circle", label: "Circle" },
+  { id: "diamond", label: "Diamond" },
+  { id: "hexagon", label: "Hexagon" },
+  { id: "parallelogram", label: "Parallelogram" },
   { id: "right-triangle", label: "Right Triangle" },
   { id: "line", label: "Line" },
   { id: "perp-line", label: "Perpendicular" },
@@ -22,6 +25,11 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#2f5bea",
     fill: "#e8efff",
+    strokeWidth: 2,
+    dash: "solid",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 10,
     label: "Service A",
   },
   {
@@ -33,6 +41,11 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#2f5bea",
     fill: "#e8efff",
+    strokeWidth: 2,
+    dash: "solid",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 10,
     label: "Service B",
   },
   {
@@ -44,6 +57,11 @@ const INITIAL_SHAPES = [
     height: 0,
     stroke: "#1f2933",
     fill: "transparent",
+    strokeWidth: 2,
+    dash: "solid",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 0,
     label: "gRPC",
   },
   {
@@ -55,6 +73,11 @@ const INITIAL_SHAPES = [
     height: 180,
     stroke: "#111827",
     fill: "#f8fafc",
+    strokeWidth: 2,
+    dash: "8 6",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 8,
     label: "Caller",
   },
   {
@@ -66,6 +89,11 @@ const INITIAL_SHAPES = [
     height: 180,
     stroke: "#111827",
     fill: "#f8fafc",
+    strokeWidth: 2,
+    dash: "8 6",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 8,
     label: "Receiver",
   },
   {
@@ -77,6 +105,11 @@ const INITIAL_SHAPES = [
     height: 90,
     stroke: "#0f766e",
     fill: "#ccfbf1",
+    strokeWidth: 2,
+    dash: "solid",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 0,
     label: "直角三角形",
   },
   {
@@ -88,6 +121,11 @@ const INITIAL_SHAPES = [
     height: 100,
     stroke: "#7c2d12",
     fill: "#ffedd5",
+    strokeWidth: 2,
+    dash: "solid",
+    fillOpacity: 1,
+    fontSize: 12,
+    cornerRadius: 0,
     label: "圆",
   },
 ];
@@ -95,6 +133,11 @@ const INITIAL_SHAPES = [
 const DEFAULT_STYLE = {
   stroke: "#2563eb",
   fill: "#e0f2fe",
+  strokeWidth: 2,
+  dash: "solid",
+  fillOpacity: 1,
+  fontSize: 12,
+  cornerRadius: 12,
 };
 
 const NAV_SECTIONS = [
@@ -119,6 +162,11 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#2f5bea",
         fill: "#e8efff",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 10,
         label: "New Component",
       };
     case "sequence":
@@ -127,6 +175,11 @@ const getShapeDefaults = (type) => {
         height: 180,
         stroke: "#111827",
         fill: "#f8fafc",
+        strokeWidth: 2,
+        dash: "8 6",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 8,
         label: "Lifeline",
       };
     case "arrow":
@@ -135,6 +188,11 @@ const getShapeDefaults = (type) => {
         height: 0,
         stroke: "#111827",
         fill: "transparent",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
         label: "call",
       };
     case "right-triangle":
@@ -143,6 +201,11 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#0f766e",
         fill: "#ccfbf1",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
         label: "直角三角形",
       };
     case "circle":
@@ -151,7 +214,51 @@ const getShapeDefaults = (type) => {
         height: 110,
         stroke: "#7c2d12",
         fill: "#ffedd5",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
         label: "圆",
+      };
+    case "diamond":
+      return {
+        width: 130,
+        height: 100,
+        stroke: "#6d28d9",
+        fill: "#ede9fe",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        label: "Diamond",
+      };
+    case "hexagon":
+      return {
+        width: 150,
+        height: 90,
+        stroke: "#b45309",
+        fill: "#fef3c7",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        label: "Hexagon",
+      };
+    case "parallelogram":
+      return {
+        width: 150,
+        height: 90,
+        stroke: "#0f766e",
+        fill: "#ccfbf1",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        label: "Parallelogram",
       };
     case "line":
       return {
@@ -159,6 +266,11 @@ const getShapeDefaults = (type) => {
         height: 0,
         stroke: "#1f2933",
         fill: "transparent",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
         label: "线段",
       };
     case "perp-line":
@@ -167,6 +279,11 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: "#1f2933",
         fill: "transparent",
+        strokeWidth: 2,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
         label: "垂线",
       };
     case "rounded":
@@ -175,6 +292,11 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
         fill: DEFAULT_STYLE.fill,
+        strokeWidth: DEFAULT_STYLE.strokeWidth,
+        dash: DEFAULT_STYLE.dash,
+        fillOpacity: DEFAULT_STYLE.fillOpacity,
+        fontSize: DEFAULT_STYLE.fontSize,
+        cornerRadius: DEFAULT_STYLE.cornerRadius,
         label: "Rounded",
       };
     case "rect":
@@ -184,6 +306,11 @@ const getShapeDefaults = (type) => {
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
         fill: DEFAULT_STYLE.fill,
+        strokeWidth: DEFAULT_STYLE.strokeWidth,
+        dash: DEFAULT_STYLE.dash,
+        fillOpacity: DEFAULT_STYLE.fillOpacity,
+        fontSize: DEFAULT_STYLE.fontSize,
+        cornerRadius: DEFAULT_STYLE.cornerRadius,
         label: "Rectangle",
       };
   }
@@ -193,7 +320,9 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
   const commonProps = {
     stroke: shape.stroke,
     fill: shape.fill,
-    strokeWidth: isSelected ? 3 : 2,
+    strokeWidth: isSelected ? shape.strokeWidth + 1 : shape.strokeWidth,
+    strokeDasharray: shape.dash === "solid" ? "none" : shape.dash,
+    fillOpacity: shape.fillOpacity,
     onClick: (event) => {
       event.stopPropagation();
       onSelect(shape.id);
@@ -217,9 +346,13 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y={shape.y}
             width={shape.width}
             height={shape.height}
-            rx={18}
+            rx={shape.cornerRadius}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -233,11 +366,76 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             cy={shape.y + shape.height / 2}
             r={shape.width / 2}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
       );
+    case "diamond": {
+      const centerX = shape.x + shape.width / 2;
+      const centerY = shape.y + shape.height / 2;
+      return (
+        <g key={shape.id}>
+          <polygon
+            {...commonProps}
+            points={`${centerX},${shape.y} ${shape.x + shape.width},${centerY} ${centerX},${
+              shape.y + shape.height
+            } ${shape.x},${centerY}`}
+          />
+          <text x={centerX} y={centerY} style={{ fontSize: shape.fontSize }}>
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
+    case "hexagon": {
+      const inset = shape.width * 0.25;
+      const rightInset = shape.width - inset;
+      const midY = shape.y + shape.height / 2;
+      return (
+        <g key={shape.id}>
+          <polygon
+            {...commonProps}
+            points={`${shape.x + inset},${shape.y} ${shape.x + rightInset},${shape.y} ${
+              shape.x + shape.width
+            },${midY} ${shape.x + rightInset},${shape.y + shape.height} ${shape.x + inset},${
+              shape.y + shape.height
+            } ${shape.x},${midY}`}
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
+    case "parallelogram": {
+      const skew = Math.min(32, shape.width * 0.2);
+      return (
+        <g key={shape.id}>
+          <polygon
+            {...commonProps}
+            points={`${shape.x + skew},${shape.y} ${shape.x + shape.width},${shape.y} ${
+              shape.x + shape.width - skew
+            },${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
+    }
     case "right-triangle":
       return (
         <g key={shape.id}>
@@ -247,7 +445,11 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
               shape.x + shape.width
             },${shape.y + shape.height} ${shape.x},${shape.y}`}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -263,7 +465,11 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y2={shape.y}
             markerEnd="url(#arrow)"
           />
-          <text x={shape.x + shape.width / 2} y={shape.y - 8}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y - 8}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -278,7 +484,11 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             x2={shape.x + shape.width}
             y2={shape.y}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y - 8}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y - 8}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -300,7 +510,11 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             x2={shape.x + shape.width / 2}
             y2={shape.y}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y - 8}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y - 8}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -314,7 +528,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y={shape.y}
             width={shape.width}
             height={36}
-            rx={8}
+            rx={shape.cornerRadius}
           />
           <line
             {...commonProps}
@@ -324,7 +538,11 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y2={shape.y + shape.height}
             strokeDasharray="6 6"
           />
-          <text x={shape.x + shape.width / 2} y={shape.y + 24}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + 24}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -340,8 +558,13 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             y={shape.y}
             width={shape.width}
             height={shape.height}
+            rx={shape.cornerRadius}
           />
-          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2}>
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+          >
             {shape.label}
           </text>
         </g>
@@ -357,7 +580,16 @@ const clampNumber = (value, min, max) => {
   return Math.min(Math.max(numberValue, min), max);
 };
 
-const DiagramCanvas = ({ shapes, selectedId, dragId, onSelect, onPointerDown, onPointerMove, onPointerUp }) => (
+const DiagramCanvas = ({
+  shapes,
+  selectedId,
+  dragId,
+  snapGuides,
+  onSelect,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+}) => (
   <svg
     className="canvas"
     viewBox="0 0 1000 700"
@@ -383,10 +615,31 @@ const DiagramCanvas = ({ shapes, selectedId, dragId, onSelect, onPointerDown, on
         refY="6"
         orient="auto"
       >
-        <path d="M0,0 L12,6 L0,12 z" fill="#111827" />
+        <path d="M0,0 L12,6 L0,12 z" fill="context-stroke" />
       </marker>
     </defs>
     <rect className="canvas-grid" x="0" y="0" width="1000" height="700" />
+    {snapGuides.map((guide) =>
+      guide.axis === "x" ? (
+        <line
+          key={`guide-x-${guide.value}`}
+          className="snap-guide"
+          x1={guide.value}
+          y1="0"
+          x2={guide.value}
+          y2="700"
+        />
+      ) : (
+        <line
+          key={`guide-y-${guide.value}`}
+          className="snap-guide"
+          x1="0"
+          y1={guide.value}
+          x2="1000"
+          y2={guide.value}
+        />
+      )
+    )}
     {shapes.map((shape) =>
       renderShape(
         shape,
@@ -399,9 +652,64 @@ const DiagramCanvas = ({ shapes, selectedId, dragId, onSelect, onPointerDown, on
   </svg>
 );
 
+const SNAP_DISTANCE = 12;
+const SNAP_AXES = ["x", "y"];
+
+const getShapeAnchors = (shape) => {
+  const left = shape.x;
+  const top = shape.y;
+  const right = shape.x + shape.width;
+  const bottom = shape.y + shape.height;
+  const centerX = shape.x + shape.width / 2;
+  const centerY = shape.y + shape.height / 2;
+  const isLine = shape.type === "line" || shape.type === "arrow";
+
+  return {
+    x: isLine ? [left, right] : [left, centerX, right],
+    y: isLine ? [top] : [top, centerY, bottom],
+  };
+};
+
+const getSnapResult = (movingShape, shapes, nextX, nextY) => {
+  const movingAnchors = getShapeAnchors({ ...movingShape, x: nextX, y: nextY });
+  const bestMatch = {
+    x: { delta: 0, distance: Infinity, guide: null },
+    y: { delta: 0, distance: Infinity, guide: null },
+  };
+
+  shapes.forEach((shape) => {
+    if (shape.id === movingShape.id) {
+      return;
+    }
+    const targetAnchors = getShapeAnchors(shape);
+    SNAP_AXES.forEach((axis) => {
+      targetAnchors[axis].forEach((targetValue) => {
+        movingAnchors[axis].forEach((anchorValue) => {
+          const delta = targetValue - anchorValue;
+          const distance = Math.abs(delta);
+          if (distance <= SNAP_DISTANCE && distance < bestMatch[axis].distance) {
+            bestMatch[axis] = {
+              delta,
+              distance,
+              guide: { axis, value: targetValue },
+            };
+          }
+        });
+      });
+    });
+  });
+
+  return {
+    x: nextX + bestMatch.x.delta,
+    y: nextY + bestMatch.y.delta,
+    guides: [bestMatch.x.guide, bestMatch.y.guide].filter(Boolean),
+  };
+};
+
 export default function App() {
   const [shapes, setShapes] = useState(INITIAL_SHAPES);
   const [selectedId, setSelectedId] = useState(shapes[0]?.id ?? null);
+  const [snapGuides, setSnapGuides] = useState([]);
   const dragState = useRef(null);
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
@@ -479,10 +787,17 @@ export default function App() {
         const nextY = y - dragState.current.offsetY;
         const maxX = 1000 - shape.width;
         const maxY = 700 - shape.height;
+        const { x: snappedX, y: snappedY, guides } = getSnapResult(
+          shape,
+          prev,
+          clampNumber(nextX, 0, maxX),
+          clampNumber(nextY, 0, maxY)
+        );
+        setSnapGuides(guides);
         return {
           ...shape,
-          x: clampNumber(nextX, 0, maxX),
-          y: clampNumber(nextY, 0, maxY),
+          x: snappedX,
+          y: snappedY,
         };
       })
     );
@@ -490,7 +805,17 @@ export default function App() {
 
   const handlePointerUp = () => {
     dragState.current = null;
+    setSnapGuides([]);
   };
+
+  const dashedOptions = [
+    { id: "solid", label: "Solid", value: "solid" },
+    { id: "dashed", label: "Dashed", value: "8 6" },
+    { id: "dotted", label: "Dotted", value: "2 6" },
+  ];
+
+  const supportsCornerRadius = ["component", "rect", "rounded", "sequence"].includes(selectedShape?.type);
+  const supportsFill = selectedShape?.fill !== "transparent";
 
   return (
     <div className="app">
@@ -548,6 +873,7 @@ export default function App() {
             shapes={shapes}
             selectedId={selectedId}
             dragId={dragState.current?.id}
+            snapGuides={snapGuides}
             onSelect={setSelectedId}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -615,6 +941,80 @@ export default function App() {
               </div>
               <div className="property-row split">
                 <div>
+                  <label htmlFor="shape-stroke-width">Stroke width</label>
+                  <input
+                    id="shape-stroke-width"
+                    type="number"
+                    min="1"
+                    max="8"
+                    value={selectedShape.strokeWidth}
+                    onChange={(event) =>
+                      updateNumericField("strokeWidth", event.target.value, 1, 8)
+                    }
+                  />
+                </div>
+                <div>
+                  <label htmlFor="shape-font-size">Font size</label>
+                  <input
+                    id="shape-font-size"
+                    type="number"
+                    min="10"
+                    max="24"
+                    value={selectedShape.fontSize}
+                    onChange={(event) =>
+                      updateNumericField("fontSize", event.target.value, 10, 24)
+                    }
+                  />
+                </div>
+              </div>
+              <div className="property-row split">
+                <div>
+                  <label htmlFor="shape-dash">Stroke style</label>
+                  <select
+                    id="shape-dash"
+                    value={selectedShape.dash}
+                    onChange={(event) => updateShape("dash", event.target.value)}
+                  >
+                    {dashedOptions.map((option) => (
+                      <option key={option.id} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="shape-opacity">Fill opacity</label>
+                  <input
+                    id="shape-opacity"
+                    type="range"
+                    min="0.1"
+                    max="1"
+                    step="0.1"
+                    value={selectedShape.fillOpacity}
+                    onChange={(event) =>
+                      updateNumericField("fillOpacity", event.target.value, 0.1, 1)
+                    }
+                    disabled={!supportsFill}
+                  />
+                </div>
+              </div>
+              {supportsCornerRadius ? (
+                <div className="property-row">
+                  <label htmlFor="shape-radius">Corner radius</label>
+                  <input
+                    id="shape-radius"
+                    type="number"
+                    min="0"
+                    max="40"
+                    value={selectedShape.cornerRadius}
+                    onChange={(event) =>
+                      updateNumericField("cornerRadius", event.target.value, 0, 40)
+                    }
+                  />
+                </div>
+              ) : null}
+              <div className="property-row split">
+                <div>
                   <label htmlFor="shape-x">X</label>
                   <input
                     id="shape-x"
@@ -650,6 +1050,7 @@ export default function App() {
             <ul>
               <li>Use the toolbar to add components, sequence lifelines, and geometry.</li>
               <li>Click any shape on the canvas to edit its colors and sizing.</li>
+              <li>Drag shapes close to each other to snap edges or line endpoints.</li>
               <li>Layer diagrams to express system interaction clearly.</li>
             </ul>
           </div>
