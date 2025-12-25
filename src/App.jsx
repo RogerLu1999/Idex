@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const TOOL_ITEMS = [
   { id: "component", label: "Component Box", icon: "🧩" },
@@ -7,8 +7,8 @@ const TOOL_ITEMS = [
   { id: "rect", label: "Rectangle", icon: "▭" },
   { id: "rounded", label: "Rounded Rect", icon: "▢" },
   { id: "circle", label: "Circle", icon: "⚪" },
-  { id: "sphere", label: "Sphere", icon: "🫧" },
-  { id: "cylinder", label: "Cylinder", icon: "🧃" },
+  { id: "sphere", label: "Sphere", icon: "◎" },
+  { id: "cylinder", label: "Cylinder", icon: "⬭" },
   { id: "diamond", label: "Diamond", icon: "🔷" },
   { id: "hexagon", label: "Hexagon", icon: "⬡" },
   { id: "parallelogram", label: "Parallelogram", icon: "▱" },
@@ -849,20 +849,31 @@ const VERTEX_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const clampAngle = (value) =>
   clampNumber(value, TRIANGLE_MIN_ANGLE, TRIANGLE_MAX_ANGLE);
 
-const normalizeTriangleAngles = (angles, changedIndex) => {
-  const nextAngles = [...angles].map(clampAngle);
-  const remaining = TRIANGLE_ANGLE_SUM - nextAngles[changedIndex];
-  const otherIndices = [0, 1, 2].filter((index) => index !== changedIndex);
-  const remainingSafe = Math.max(remaining, TRIANGLE_MIN_ANGLE * 2);
-  nextAngles[changedIndex] = TRIANGLE_ANGLE_SUM - remainingSafe;
-  const previousTotal =
-    angles[otherIndices[0]] + angles[otherIndices[1]] || TRIANGLE_ANGLE_SUM - 1;
-  let firstShare = remainingSafe * (angles[otherIndices[0]] / previousTotal);
-  firstShare = clampNumber(firstShare, TRIANGLE_MIN_ANGLE, remainingSafe - TRIANGLE_MIN_ANGLE);
-  const secondShare = remainingSafe - firstShare;
-  nextAngles[otherIndices[0]] = firstShare;
-  nextAngles[otherIndices[1]] = secondShare;
-  return nextAngles;
+const normalizeTriangleAngles = (angles, changedIndex, lockedIndex) => {
+  const safeAngles = [...angles].map(clampAngle);
+  const lockIndex = lockedIndex ?? (changedIndex === 0 ? 1 : 0);
+  const thirdIndex = [0, 1, 2].find(
+    (index) => index !== changedIndex && index !== lockIndex
+  );
+  const lockedAngle = clampAngle(safeAngles[lockIndex]);
+  let changedAngle = clampAngle(safeAngles[changedIndex]);
+  let remaining = TRIANGLE_ANGLE_SUM - lockedAngle - changedAngle;
+  if (remaining < TRIANGLE_MIN_ANGLE) {
+    changedAngle = TRIANGLE_ANGLE_SUM - lockedAngle - TRIANGLE_MIN_ANGLE;
+  } else if (remaining > TRIANGLE_MAX_ANGLE) {
+    changedAngle = TRIANGLE_ANGLE_SUM - lockedAngle - TRIANGLE_MAX_ANGLE;
+  }
+  changedAngle = clampAngle(changedAngle);
+  remaining = TRIANGLE_ANGLE_SUM - lockedAngle - changedAngle;
+  return safeAngles.map((_, index) => {
+    if (index === lockIndex) {
+      return lockedAngle;
+    }
+    if (index === changedIndex) {
+      return changedAngle;
+    }
+    return clampAngle(remaining);
+  });
 };
 
 const getTriangleMetricsFromAngles = (baseLength, angles) => {
@@ -879,7 +890,7 @@ const getTriangleMetricsFromAngles = (baseLength, angles) => {
 };
 
 const buildTrianglePoints = ({ x, y, width }, angles) => {
-  const normalizedAngles = normalizeTriangleAngles(angles, 0);
+  const normalizedAngles = normalizeTriangleAngles(angles, 0, 1);
   const { apexX, height } = getTriangleMetricsFromAngles(width, normalizedAngles);
   const baseY = y + height;
   return {
@@ -1116,7 +1127,16 @@ const DiagramCanvas = ({
           className="vertex-label"
           onPointerDown={(event) => onLabelPointerDown(event, shape, label.id)}
         >
-          <rect x={label.x - 12} y={label.y - 12} width="24" height="20" rx="6" />
+          <rect
+            className={`vertex-label-box${
+              /[A-Za-z]/.test(label.text) ? " vertex-label-box--transparent" : ""
+            }`}
+            x={label.x - 12}
+            y={label.y - 12}
+            width="24"
+            height="20"
+            rx="6"
+          />
           <text x={label.x} y={label.y - 2}>
             {label.text}
           </text>
@@ -1287,11 +1307,16 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(shapes[0]?.id ?? null);
   const [snapGuides, setSnapGuides] = useState([]);
   const [showGrid, setShowGrid] = useState(true);
+  const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
   const dragState = useRef(null);
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
     [shapes, selectedId]
   );
+
+  useEffect(() => {
+    setTriangleAngleDrafts({});
+  }, [selectedId]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -1988,23 +2013,51 @@ export default function App() {
                 <div className="property-row">
                   <span className="property-label">Triangle angles</span>
                   <div className="angle-grid">
-                    {triangleAngles.map((angle, index) => (
-                      <div key={`angle-${index}`}>
-                        <label htmlFor={`triangle-angle-${index}`}>
-                          {`Angle ${VERTEX_LETTERS[index]}`}
-                        </label>
-                        <input
-                          id={`triangle-angle-${index}`}
-                          type="number"
-                          min={TRIANGLE_MIN_ANGLE}
-                          max={TRIANGLE_MAX_ANGLE}
-                          value={Math.round(angle)}
-                          onChange={(event) =>
-                            updateTriangleAngle(index, event.target.value)
-                          }
-                        />
-                      </div>
-                    ))}
+                    {triangleAngles.map((angle, index) => {
+                      const draftValue = triangleAngleDrafts[index];
+                      return (
+                        <div key={`angle-${index}`}>
+                          <label htmlFor={`triangle-angle-${index}`}>
+                            {`Angle ${VERTEX_LETTERS[index]}`}
+                          </label>
+                          <input
+                            id={`triangle-angle-${index}`}
+                            type="number"
+                            min={TRIANGLE_MIN_ANGLE}
+                            max={TRIANGLE_MAX_ANGLE}
+                            value={draftValue ?? Math.round(angle)}
+                            onChange={(event) => {
+                              const nextValue = event.target.value;
+                              setTriangleAngleDrafts((prev) => ({
+                                ...prev,
+                                [index]: nextValue,
+                              }));
+                              if (nextValue === "") {
+                                return;
+                              }
+                              const numericValue = Number(nextValue);
+                              if (!Number.isNaN(numericValue)) {
+                                updateTriangleAngle(index, numericValue);
+                              }
+                            }}
+                            onBlur={() => {
+                              const draft = triangleAngleDrafts[index];
+                              if (draft === undefined) {
+                                return;
+                              }
+                              if (draft !== "") {
+                                updateTriangleAngle(index, draft);
+                              }
+                              setTriangleAngleDrafts((prev) => {
+                                const nextDrafts = { ...prev };
+                                delete nextDrafts[index];
+                                return nextDrafts;
+                              });
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
