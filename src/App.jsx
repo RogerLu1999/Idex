@@ -30,7 +30,8 @@ const INITIAL_SHAPES = [
     width: 180,
     height: 90,
     stroke: "#2f5bea",
-    fill: "#e8efff",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
@@ -47,7 +48,8 @@ const INITIAL_SHAPES = [
     width: 180,
     height: 90,
     stroke: "#2f5bea",
-    fill: "#e8efff",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
@@ -65,6 +67,7 @@ const INITIAL_SHAPES = [
     height: 0,
     stroke: "#1f2933",
     fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
@@ -81,7 +84,8 @@ const INITIAL_SHAPES = [
     width: 120,
     height: 180,
     stroke: "#111827",
-    fill: "#f8fafc",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "8 6",
     fillOpacity: 1,
@@ -98,7 +102,8 @@ const INITIAL_SHAPES = [
     width: 120,
     height: 180,
     stroke: "#111827",
-    fill: "#f8fafc",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "8 6",
     fillOpacity: 1,
@@ -115,7 +120,8 @@ const INITIAL_SHAPES = [
     width: 120,
     height: 90,
     stroke: "#0f766e",
-    fill: "#ccfbf1",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
@@ -132,7 +138,8 @@ const INITIAL_SHAPES = [
     width: 100,
     height: 100,
     stroke: "#7c2d12",
-    fill: "#ffedd5",
+    fill: "transparent",
+    fillEffect: "solid",
     strokeWidth: 1,
     dash: "solid",
     fillOpacity: 1,
@@ -145,12 +152,13 @@ const INITIAL_SHAPES = [
 
 const DEFAULT_STYLE = {
   stroke: "#2563eb",
-  fill: "#e0f2fe",
+  fill: "transparent",
   strokeWidth: 1,
   dash: "solid",
   fillOpacity: 1,
   fontSize: 12,
   cornerRadius: 12,
+  fillEffect: "solid",
 };
 
 const NAV_SECTIONS = [
@@ -174,13 +182,14 @@ const getShapeDefaults = (type) => {
         width: 180,
         height: 90,
         stroke: "#2f5bea",
-        fill: "#e8efff",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 10,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "sequence":
@@ -188,13 +197,14 @@ const getShapeDefaults = (type) => {
         width: 120,
         height: 180,
         stroke: "#111827",
-        fill: "#f8fafc",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "8 6",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 8,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "arrow":
@@ -209,6 +219,7 @@ const getShapeDefaults = (type) => {
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "right-triangle":
@@ -216,13 +227,14 @@ const getShapeDefaults = (type) => {
         width: 120,
         height: 90,
         stroke: "#0f766e",
-        fill: "#ccfbf1",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "triangle":
@@ -230,13 +242,14 @@ const getShapeDefaults = (type) => {
         width: 140,
         height: 110,
         stroke: "#0f766e",
-        fill: "#ccfbf1",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "circle":
@@ -244,13 +257,14 @@ const getShapeDefaults = (type) => {
         width: 110,
         height: 110,
         stroke: "#7c2d12",
-        fill: "#ffedd5",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "sphere":
@@ -258,13 +272,14 @@ const getShapeDefaults = (type) => {
         width: 120,
         height: 120,
         stroke: "#1d4ed8",
-        fill: "#dbeafe",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "cylinder":
@@ -272,13 +287,14 @@ const getShapeDefaults = (type) => {
         width: 140,
         height: 120,
         stroke: "#0f766e",
-        fill: "#ccfbf1",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "diamond":
@@ -286,13 +302,14 @@ const getShapeDefaults = (type) => {
         width: 130,
         height: 100,
         stroke: "#6d28d9",
-        fill: "#ede9fe",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "hexagon":
@@ -300,13 +317,14 @@ const getShapeDefaults = (type) => {
         width: 150,
         height: 90,
         stroke: "#b45309",
-        fill: "#fef3c7",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "parallelogram":
@@ -314,13 +332,14 @@ const getShapeDefaults = (type) => {
         width: 150,
         height: 90,
         stroke: "#0f766e",
-        fill: "#ccfbf1",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "trapezoid":
@@ -328,13 +347,14 @@ const getShapeDefaults = (type) => {
         width: 150,
         height: 90,
         stroke: "#b91c1c",
-        fill: "#fee2e2",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "isosceles-trapezoid":
@@ -342,13 +362,14 @@ const getShapeDefaults = (type) => {
         width: 150,
         height: 90,
         stroke: "#7c3aed",
-        fill: "#ede9fe",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "right-trapezoid":
@@ -356,13 +377,14 @@ const getShapeDefaults = (type) => {
         width: 150,
         height: 90,
         stroke: "#0f766e",
-        fill: "#ccfbf1",
+        fill: "transparent",
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "line":
@@ -377,6 +399,7 @@ const getShapeDefaults = (type) => {
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "perp-line":
@@ -391,6 +414,7 @@ const getShapeDefaults = (type) => {
         fontSize: 12,
         cornerRadius: 0,
         rotation: 0,
+        fillEffect: "solid",
         label: "",
       };
     case "rounded":
@@ -405,6 +429,7 @@ const getShapeDefaults = (type) => {
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
         rotation: 0,
+        fillEffect: DEFAULT_STYLE.fillEffect,
         label: "",
       };
     case "rect":
@@ -420,12 +445,232 @@ const getShapeDefaults = (type) => {
         fontSize: DEFAULT_STYLE.fontSize,
         cornerRadius: DEFAULT_STYLE.cornerRadius,
         rotation: 0,
+        fillEffect: DEFAULT_STYLE.fillEffect,
         label: "",
       };
   }
 };
 
-const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => {
+const BOOLEAN_SHAPE_TYPES = new Set([
+  "component",
+  "rect",
+  "rounded",
+  "circle",
+  "sphere",
+  "cylinder",
+  "diamond",
+  "hexagon",
+  "parallelogram",
+  "trapezoid",
+  "isosceles-trapezoid",
+  "right-trapezoid",
+  "right-triangle",
+  "triangle",
+]);
+
+const FILL_EFFECTS = [
+  { id: "solid", label: "Solid", value: "solid" },
+  { id: "shadow", label: "Shadow", value: "shadow" },
+];
+
+const renderShapePrimitive = (shape, props = {}) => {
+  const rotation = shape.rotation ?? 0;
+  const centerX = shape.x + shape.width / 2;
+  const centerY = shape.y + shape.height / 2;
+  const groupProps = rotation
+    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
+    : {};
+  const sharedProps = {
+    stroke: shape.stroke,
+    fill: shape.fill,
+    strokeWidth: shape.strokeWidth,
+    strokeDasharray: shape.dash === "solid" ? "none" : shape.dash,
+    fillOpacity: shape.fillOpacity,
+    ...props,
+  };
+
+  switch (shape.type) {
+    case "rounded":
+    case "component":
+    case "rect":
+      return (
+        <g {...groupProps}>
+          <rect
+            {...sharedProps}
+            x={shape.x}
+            y={shape.y}
+            width={shape.width}
+            height={shape.height}
+            rx={shape.cornerRadius}
+          />
+        </g>
+      );
+    case "circle":
+    case "sphere":
+      return (
+        <g {...groupProps}>
+          <ellipse
+            {...sharedProps}
+            cx={shape.x + shape.width / 2}
+            cy={shape.y + shape.height / 2}
+            rx={shape.width / 2}
+            ry={shape.height / 2}
+          />
+        </g>
+      );
+    case "cylinder": {
+      const capHeight = Math.min(24, shape.height * 0.25);
+      const bodyHeight = Math.max(0, shape.height - capHeight);
+      const cx = shape.x + shape.width / 2;
+      const topY = shape.y + capHeight / 2;
+      const bottomY = shape.y + capHeight / 2 + bodyHeight;
+      return (
+        <g {...groupProps}>
+          <rect
+            {...sharedProps}
+            x={shape.x}
+            y={shape.y + capHeight / 2}
+            width={shape.width}
+            height={bodyHeight}
+          />
+          <ellipse
+            {...sharedProps}
+            cx={cx}
+            cy={topY}
+            rx={shape.width / 2}
+            ry={capHeight / 2}
+          />
+          <ellipse
+            {...sharedProps}
+            cx={cx}
+            cy={bottomY}
+            rx={shape.width / 2}
+            ry={capHeight / 2}
+          />
+        </g>
+      );
+    }
+    case "diamond": {
+      const centerX = shape.x + shape.width / 2;
+      const centerY = shape.y + shape.height / 2;
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${centerX},${shape.y} ${shape.x + shape.width},${centerY} ${centerX},${
+              shape.y + shape.height
+            } ${shape.x},${centerY}`}
+          />
+        </g>
+      );
+    }
+    case "hexagon": {
+      const inset = shape.width * 0.25;
+      const rightInset = shape.width - inset;
+      const midY = shape.y + shape.height / 2;
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x + inset},${shape.y} ${shape.x + rightInset},${shape.y} ${
+              shape.x + shape.width
+            },${midY} ${shape.x + rightInset},${shape.y + shape.height} ${
+              shape.x + inset
+            },${shape.y + shape.height} ${shape.x},${midY}`}
+          />
+        </g>
+      );
+    }
+    case "parallelogram": {
+      const skew = Math.min(32, shape.width * 0.2);
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x + skew},${shape.y} ${shape.x + shape.width},${shape.y} ${
+              shape.x + shape.width - skew
+            },${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+          />
+        </g>
+      );
+    }
+    case "right-triangle":
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x},${shape.y + shape.height} ${
+              shape.x + shape.width
+            },${shape.y + shape.height} ${shape.x},${shape.y}`}
+          />
+        </g>
+      );
+    case "triangle": {
+      const points = (shape.points ?? [])
+        .map((point) => `${point.x},${point.y}`)
+        .join(" ");
+      return (
+        <g {...groupProps}>
+          <polygon {...sharedProps} points={points} />
+        </g>
+      );
+    }
+    case "trapezoid": {
+      const leftInset = Math.min(40, shape.width * 0.35);
+      const rightInset = Math.min(20, shape.width * 0.15);
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x + leftInset},${shape.y} ${shape.x + shape.width - rightInset},${
+              shape.y
+            } ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${
+              shape.y + shape.height
+            }`}
+          />
+        </g>
+      );
+    }
+    case "isosceles-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x + inset},${shape.y} ${shape.x + shape.width - inset},${
+              shape.y
+            } ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${
+              shape.y + shape.height
+            }`}
+          />
+        </g>
+      );
+    }
+    case "right-trapezoid": {
+      const inset = Math.min(36, shape.width * 0.25);
+      return (
+        <g {...groupProps}>
+          <polygon
+            {...sharedProps}
+            points={`${shape.x},${shape.y} ${shape.x + shape.width - inset},${shape.y} ${
+              shape.x + shape.width
+            },${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+          />
+        </g>
+      );
+    }
+    default:
+      return null;
+  }
+};
+
+const renderCompoundShape = (
+  shape,
+  isSelected,
+  isDragging,
+  onSelect,
+  onPointerDown
+) => {
   const rotation = shape.rotation ?? 0;
   const centerX = shape.x + shape.width / 2;
   const centerY = shape.y + shape.height / 2;
@@ -438,9 +683,77 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
     strokeWidth: isSelected ? shape.strokeWidth + 1 : shape.strokeWidth,
     strokeDasharray: shape.dash === "solid" ? "none" : shape.dash,
     fillOpacity: shape.fillOpacity,
+    filter:
+      shape.fillEffect === "shadow" && shape.fill !== "transparent"
+        ? "url(#fill-shadow)"
+        : undefined,
+    pointerEvents: "none",
+  };
+  const groupClassName = ["shape", isSelected ? "selected" : null, isDragging ? "dragging" : null]
+    .filter(Boolean)
+    .join(" ");
+  const maskId = `mask-${shape.id}`;
+  const [baseShape, cutterShape] = shape.children ?? [];
+  return (
+    <g
+      key={shape.id}
+      {...groupProps}
+      className={groupClassName}
+      onClick={(event) => {
+        event.stopPropagation();
+        onSelect(shape.id, event);
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        onPointerDown(event, shape);
+      }}
+    >
+      {shape.operation === "subtract" && baseShape && cutterShape ? (
+        <>
+          <mask id={maskId}>
+            <rect x="0" y="0" width="1000" height="700" fill="white" />
+            {renderShapePrimitive(cutterShape, {
+              fill: "black",
+              stroke: "black",
+              pointerEvents: "none",
+            })}
+          </mask>
+          {renderShapePrimitive(baseShape, { ...commonProps, mask: `url(#${maskId})` })}
+        </>
+      ) : (
+        <>
+          {(shape.children ?? []).map((child) =>
+            renderShapePrimitive(child, commonProps)
+          )}
+        </>
+      )}
+    </g>
+  );
+};
+
+const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => {
+  if (shape.type === "compound") {
+    return renderCompoundShape(shape, isSelected, isDragging, onSelect, onPointerDown);
+  }
+  const rotation = shape.rotation ?? 0;
+  const centerX = shape.x + shape.width / 2;
+  const centerY = shape.y + shape.height / 2;
+  const groupProps = rotation
+    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
+    : {};
+  const commonProps = {
+    stroke: shape.stroke,
+    fill: shape.fill,
+    strokeWidth: isSelected ? shape.strokeWidth + 1 : shape.strokeWidth,
+    strokeDasharray: shape.dash === "solid" ? "none" : shape.dash,
+    fillOpacity: shape.fillOpacity,
+    filter:
+      shape.fillEffect === "shadow" && shape.fill !== "transparent"
+        ? "url(#fill-shadow)"
+        : undefined,
     onClick: (event) => {
       event.stopPropagation();
-      onSelect(shape.id);
+      onSelect(shape.id, event);
     },
     onPointerDown: (event) => {
       event.stopPropagation();
@@ -941,6 +1254,8 @@ const getTriangleAnglesFromPoints = (points) => {
 
 const getShapeVertices = (shape) => {
   switch (shape.type) {
+    case "compound":
+      return [];
     case "triangle":
       return shape.points ?? [];
     case "right-triangle":
@@ -1029,6 +1344,124 @@ const getShapeVertices = (shape) => {
   }
 };
 
+const getShapeBounds = (shape) => {
+  if (shape.type === "triangle" && shape.points) {
+    return getTriangleBounds(shape.points);
+  }
+  return {
+    x: shape.x,
+    y: shape.y,
+    width: shape.width,
+    height: shape.height,
+  };
+};
+
+const cloneShapeForCompound = (shape) => ({
+  ...shape,
+  label: "",
+  vertexLabels: null,
+});
+
+const translateShape = (shape, deltaX, deltaY) => {
+  if (shape.type === "triangle" && shape.points) {
+    const movedPoints = shape.points.map((point) => ({
+      x: point.x + deltaX,
+      y: point.y + deltaY,
+    }));
+    const movedLabels = shape.vertexLabels
+      ? shape.vertexLabels.map((label) => ({
+          ...label,
+          x: label.x + deltaX,
+          y: label.y + deltaY,
+        }))
+      : shape.vertexLabels;
+    return {
+      ...shape,
+      x: shape.x + deltaX,
+      y: shape.y + deltaY,
+      points: movedPoints,
+      vertexLabels: movedLabels,
+    };
+  }
+  if (shape.type === "compound") {
+    return {
+      ...shape,
+      x: shape.x + deltaX,
+      y: shape.y + deltaY,
+      children: (shape.children ?? []).map((child) => translateShape(child, deltaX, deltaY)),
+    };
+  }
+  return {
+    ...shape,
+    x: shape.x + deltaX,
+    y: shape.y + deltaY,
+    vertexLabels: shape.vertexLabels
+      ? shape.vertexLabels.map((label) => ({
+          ...label,
+          x: label.x + deltaX,
+          y: label.y + deltaY,
+        }))
+      : shape.vertexLabels,
+  };
+};
+
+const scaleShape = (shape, scaleX, scaleY, originX, originY) => {
+  const scalePoint = (point) => ({
+    x: originX + (point.x - originX) * scaleX,
+    y: originY + (point.y - originY) * scaleY,
+  });
+  if (shape.type === "triangle" && shape.points) {
+    const scaledPoints = shape.points.map(scalePoint);
+    const nextBounds = getTriangleBounds(scaledPoints);
+    const scaledLabels = shape.vertexLabels
+      ? shape.vertexLabels.map((label) => scalePoint(label))
+      : shape.vertexLabels;
+    return {
+      ...shape,
+      ...nextBounds,
+      points: scaledPoints,
+      vertexLabels: scaledLabels,
+      angles: getTriangleAnglesFromPoints(scaledPoints),
+    };
+  }
+  if (shape.type === "compound") {
+    const scaledChildren = (shape.children ?? []).map((child) =>
+      scaleShape(child, scaleX, scaleY, originX, originY)
+    );
+    const bounds = scaledChildren.reduce(
+      (acc, child) => {
+        const childBounds = getShapeBounds(child);
+        return {
+          minX: Math.min(acc.minX, childBounds.x),
+          minY: Math.min(acc.minY, childBounds.y),
+          maxX: Math.max(acc.maxX, childBounds.x + childBounds.width),
+          maxY: Math.max(acc.maxY, childBounds.y + childBounds.height),
+        };
+      },
+      { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+    return {
+      ...shape,
+      x: bounds.minX,
+      y: bounds.minY,
+      width: bounds.maxX - bounds.minX,
+      height: bounds.maxY - bounds.minY,
+      children: scaledChildren,
+    };
+  }
+  const scaledLabels = shape.vertexLabels
+    ? shape.vertexLabels.map(scalePoint)
+    : shape.vertexLabels;
+  return {
+    ...shape,
+    x: originX + (shape.x - originX) * scaleX,
+    y: originY + (shape.y - originY) * scaleY,
+    width: shape.width * scaleX,
+    height: shape.height * scaleY,
+    vertexLabels: scaledLabels,
+  };
+};
+
 const createVertexLabels = (shape) =>
   getShapeVertices(shape).map((vertex, index) => ({
     id: `${shape.id}-label-${index}`,
@@ -1039,7 +1472,7 @@ const createVertexLabels = (shape) =>
 
 const DiagramCanvas = ({
   shapes,
-  selectedId,
+  selectedIds,
   dragId,
   snapGuides,
   selectedShape,
@@ -1080,6 +1513,9 @@ const DiagramCanvas = ({
       >
         <path d="M0,0 L12,6 L0,12 z" fill="context-stroke" />
       </marker>
+      <filter id="fill-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#1e293b" floodOpacity="0.25" />
+      </filter>
     </defs>
     <rect
       className="canvas-grid"
@@ -1114,7 +1550,7 @@ const DiagramCanvas = ({
     {shapes.map((shape) =>
       renderShape(
         shape,
-        shape.id === selectedId,
+        selectedIds.includes(shape.id),
         shape.id === dragId,
         onSelect,
         onPointerDown
@@ -1304,19 +1740,40 @@ const getSnapResult = (movingShape, shapes, nextX, nextY) => {
 
 export default function App() {
   const [shapes, setShapes] = useState(INITIAL_SHAPES);
-  const [selectedId, setSelectedId] = useState(shapes[0]?.id ?? null);
+  const [selectedIds, setSelectedIds] = useState(
+    shapes[0]?.id ? [shapes[0].id] : []
+  );
   const [snapGuides, setSnapGuides] = useState([]);
   const [showGrid, setShowGrid] = useState(true);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
   const dragState = useRef(null);
+  const selectedId = selectedIds[0] ?? null;
   const selectedShape = useMemo(
     () => shapes.find((shape) => shape.id === selectedId),
     [shapes, selectedId]
+  );
+  const selectedShapes = useMemo(
+    () => selectedIds.map((id) => shapes.find((shape) => shape.id === id)).filter(Boolean),
+    [selectedIds, shapes]
   );
 
   useEffect(() => {
     setTriangleAngleDrafts({});
   }, [selectedId]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
+        return;
+      }
+      if (event.key === "Delete" || event.key === "Backspace") {
+        setShapes((prev) => prev.filter((shape) => !selectedIds.includes(shape.id)));
+        setSelectedIds([]);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedIds]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -1344,7 +1801,7 @@ export default function App() {
       };
     }
     setShapes((prev) => [...prev, newShape]);
-    setSelectedId(newShape.id);
+    setSelectedIds([newShape.id]);
   };
 
   const updateShape = (field, value) => {
@@ -1353,7 +1810,7 @@ export default function App() {
     }
     setShapes((prev) =>
       prev.map((shape) =>
-        shape.id === selectedShape.id
+            shape.id === selectedShape.id
           ? (() => {
               if (shape.type === "triangle" && shape.points) {
                 if (field === "x" || field === "y") {
@@ -1400,6 +1857,19 @@ export default function App() {
                     angles: getTriangleAnglesFromPoints(nextPoints),
                     vertexLabels: nextLabels,
                   };
+                }
+              }
+              if (shape.type === "compound") {
+                if (field === "x" || field === "y") {
+                  const delta = value - shape[field];
+                  return translateShape(shape, field === "x" ? delta : 0, field === "y" ? delta : 0);
+                }
+                if (field === "width" || field === "height") {
+                  const nextWidth = field === "width" ? value : shape.width;
+                  const nextHeight = field === "height" ? value : shape.height;
+                  const scaleX = shape.width ? nextWidth / shape.width : 1;
+                  const scaleY = shape.height ? nextHeight / shape.height : 1;
+                  return scaleShape(shape, scaleX, scaleY, shape.x, shape.y);
                 }
               }
               return {
@@ -1502,7 +1972,13 @@ export default function App() {
       offsetX: x - shape.x,
       offsetY: y - shape.y,
     };
-    setSelectedId(shape.id);
+    if (event.shiftKey) {
+      setSelectedIds((prev) =>
+        prev.includes(shape.id) ? prev.filter((item) => item !== shape.id) : [...prev, shape.id]
+      );
+    } else {
+      setSelectedIds([shape.id]);
+    }
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
@@ -1520,8 +1996,10 @@ export default function App() {
       startHeight: shape.height,
       startPoints: shape.points ? [...shape.points] : null,
       startLabels: shape.vertexLabels ? [...shape.vertexLabels] : null,
+      startCompound:
+        shape.type === "compound" ? JSON.parse(JSON.stringify(shape)) : null,
     };
-    setSelectedId(shape.id);
+    setSelectedIds([shape.id]);
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -1539,7 +2017,7 @@ export default function App() {
       startPointerAngle,
       startAngle: shape.rotation ?? 0,
     };
-    setSelectedId(shape.id);
+    setSelectedIds([shape.id]);
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -1550,7 +2028,7 @@ export default function App() {
       mode: "vertex",
       vertexIndex,
     };
-    setSelectedId(shape.id);
+    setSelectedIds([shape.id]);
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -1568,7 +2046,7 @@ export default function App() {
       offsetX: x - label.x,
       offsetY: y - label.y,
     };
-    setSelectedId(shape.id);
+    setSelectedIds([shape.id]);
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -1652,6 +2130,9 @@ export default function App() {
                 y: clampedY + (label.y - drag.startY) * scaleY,
               }))
             : shape.vertexLabels;
+          if (shape.type === "compound" && drag.startCompound) {
+            return scaleShape(drag.startCompound, scaleX, scaleY, drag.startX, drag.startY);
+          }
           if (shape.type === "triangle" && drag.startPoints) {
             const nextPoints = drag.startPoints.map((point) => ({
               x: clampedX + (point.x - drag.startX) * scaleX,
@@ -1701,6 +2182,9 @@ export default function App() {
         setSnapGuides(guides);
         const deltaX = snappedX - shape.x;
         const deltaY = snappedY - shape.y;
+        if (shape.type === "compound") {
+          return translateShape(shape, deltaX, deltaY);
+        }
         const movedLabels = shape.vertexLabels
           ? shape.vertexLabels.map((label) => ({
               ...label,
@@ -1742,14 +2226,122 @@ export default function App() {
     { id: "dotted", label: "Dotted", value: "2 6" },
   ];
 
-  const supportsCornerRadius = ["component", "rect", "rounded", "sequence"].includes(selectedShape?.type);
-  const supportsFill = selectedShape?.fill !== "transparent";
+  const supportsCornerRadius = ["component", "rect", "rounded", "sequence"].includes(
+    selectedShape?.type
+  );
+  const supportsFill = selectedShape
+    ? !["line", "arrow", "perp-line"].includes(selectedShape.type)
+    : false;
+  const isTransparentFill = selectedShape?.fill === "transparent";
   const vertexCandidates = selectedShape ? getShapeVertices(selectedShape) : [];
   const hasVertices = vertexCandidates.length >= 2;
   const triangleAngles =
     selectedShape?.type === "triangle"
       ? selectedShape.angles ?? getTriangleAnglesFromPoints(selectedShape.points ?? [])
       : null;
+
+  const handleSelectShape = (id, event) => {
+    if (!id) {
+      setSelectedIds([]);
+      return;
+    }
+    if (event?.shiftKey) {
+      setSelectedIds((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+      return;
+    }
+    setSelectedIds([id]);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+    setShapes((prev) => prev.filter((shape) => !selectedIds.includes(shape.id)));
+    setSelectedIds([]);
+  };
+
+  const canBooleanOps =
+    selectedShapes.length === 2 &&
+    selectedShapes.every((shape) => BOOLEAN_SHAPE_TYPES.has(shape.type));
+
+  const handleMergeSelected = () => {
+    if (!canBooleanOps) {
+      return;
+    }
+    const [first, second] = selectedShapes;
+    const bounds = [first, second].reduce(
+      (acc, shape) => {
+        const shapeBounds = getShapeBounds(shape);
+        return {
+          minX: Math.min(acc.minX, shapeBounds.x),
+          minY: Math.min(acc.minY, shapeBounds.y),
+          maxX: Math.max(acc.maxX, shapeBounds.x + shapeBounds.width),
+          maxY: Math.max(acc.maxY, shapeBounds.y + shapeBounds.height),
+        };
+      },
+      { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+    const mergedShape = {
+      id: `shape-${shapes.length + 1}`,
+      type: "compound",
+      operation: "merge",
+      x: bounds.minX,
+      y: bounds.minY,
+      width: bounds.maxX - bounds.minX,
+      height: bounds.maxY - bounds.minY,
+      stroke: first.stroke,
+      fill: first.fill,
+      strokeWidth: first.strokeWidth,
+      dash: first.dash,
+      fillOpacity: first.fillOpacity,
+      fontSize: first.fontSize,
+      cornerRadius: first.cornerRadius,
+      rotation: first.rotation ?? 0,
+      fillEffect: first.fillEffect ?? "solid",
+      label: "",
+      children: [cloneShapeForCompound(first), cloneShapeForCompound(second)],
+    };
+    setShapes((prev) => [
+      ...prev.filter((shape) => !selectedIds.includes(shape.id)),
+      mergedShape,
+    ]);
+    setSelectedIds([mergedShape.id]);
+  };
+
+  const handleSubtractSelected = () => {
+    if (!canBooleanOps) {
+      return;
+    }
+    const [baseShape, cutterShape] = selectedShapes;
+    const bounds = getShapeBounds(baseShape);
+    const clippedShape = {
+      id: `shape-${shapes.length + 1}`,
+      type: "compound",
+      operation: "subtract",
+      x: bounds.x,
+      y: bounds.y,
+      width: bounds.width,
+      height: bounds.height,
+      stroke: baseShape.stroke,
+      fill: baseShape.fill,
+      strokeWidth: baseShape.strokeWidth,
+      dash: baseShape.dash,
+      fillOpacity: baseShape.fillOpacity,
+      fontSize: baseShape.fontSize,
+      cornerRadius: baseShape.cornerRadius,
+      rotation: baseShape.rotation ?? 0,
+      fillEffect: baseShape.fillEffect ?? "solid",
+      label: "",
+      children: [cloneShapeForCompound(baseShape), cloneShapeForCompound(cutterShape)],
+    };
+    setShapes((prev) => [
+      ...prev.filter((shape) => !selectedIds.includes(shape.id)),
+      clippedShape,
+    ]);
+    setSelectedIds([clippedShape.id]);
+  };
 
   return (
     <div className="app">
@@ -1820,12 +2412,12 @@ export default function App() {
           </div>
           <DiagramCanvas
             shapes={shapes}
-            selectedId={selectedId}
+            selectedIds={selectedIds}
             dragId={dragState.current?.id}
             snapGuides={snapGuides}
             selectedShape={selectedShape}
             showGrid={showGrid}
-            onSelect={setSelectedId}
+            onSelect={handleSelectShape}
             onPointerDown={handlePointerDown}
             onResizePointerDown={handleResizePointerDown}
             onRotatePointerDown={handleRotatePointerDown}
@@ -1838,7 +2430,40 @@ export default function App() {
 
         <aside className="panel inspector">
           <h2>Properties</h2>
-          {selectedShape ? (
+          {selectedShapes.length > 1 ? (
+            <div className="properties">
+              <p className="helper-text">{`Selected ${selectedShapes.length} shapes.`}</p>
+              <div className="property-row action-row">
+                <span className="property-label">Merge shapes</span>
+                <div className="action-buttons">
+                  <button
+                    type="button"
+                    onClick={handleMergeSelected}
+                    disabled={!canBooleanOps}
+                  >
+                    Merge
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubtractSelected}
+                    disabled={!canBooleanOps}
+                  >
+                    Clip
+                  </button>
+                </div>
+                {!canBooleanOps ? (
+                  <p className="helper-text">
+                    Select two area shapes (rectangles or polygons) to merge or clip.
+                  </p>
+                ) : null}
+              </div>
+              <div className="property-row">
+                <button type="button" className="danger" onClick={handleDeleteSelected}>
+                  Delete selected
+                </button>
+              </div>
+            </div>
+          ) : selectedShape ? (
             <div className="properties">
               <div className="property-row">
                 <label htmlFor="shape-label">Label</label>
@@ -1859,12 +2484,38 @@ export default function App() {
               </div>
               <div className="property-row">
                 <label htmlFor="shape-fill">Fill</label>
-                <input
-                  id="shape-fill"
-                  type="color"
-                  value={selectedShape.fill}
-                  onChange={(event) => updateShape("fill", event.target.value)}
-                />
+                <div className="inline-row">
+                  <input
+                    id="shape-fill"
+                    type="color"
+                    value={isTransparentFill ? "#ffffff" : selectedShape.fill}
+                    onChange={(event) => updateShape("fill", event.target.value)}
+                    disabled={!supportsFill}
+                  />
+                  <button
+                    type="button"
+                    className="ghost"
+                    onClick={() => updateShape("fill", "transparent")}
+                    disabled={!supportsFill}
+                  >
+                    Transparent
+                  </button>
+                </div>
+              </div>
+              <div className="property-row">
+                <label htmlFor="shape-fill-effect">Fill effect</label>
+                <select
+                  id="shape-fill-effect"
+                  value={selectedShape.fillEffect ?? "solid"}
+                  onChange={(event) => updateShape("fillEffect", event.target.value)}
+                  disabled={!supportsFill || isTransparentFill}
+                >
+                  {FILL_EFFECTS.map((option) => (
+                    <option key={option.id} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="property-row split">
                 <div>
@@ -1949,7 +2600,7 @@ export default function App() {
                     onChange={(event) =>
                       updateNumericField("fillOpacity", event.target.value, 0.1, 1)
                     }
-                    disabled={!supportsFill}
+                    disabled={!supportsFill || isTransparentFill}
                   />
                 </div>
               </div>
@@ -2091,6 +2742,11 @@ export default function App() {
                   )}
                 </div>
               ) : null}
+              <div className="property-row">
+                <button type="button" className="danger" onClick={handleDeleteSelected}>
+                  Delete shape
+                </button>
+              </div>
             </div>
           ) : (
             <p>Select a shape to customize it.</p>
