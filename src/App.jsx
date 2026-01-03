@@ -163,9 +163,7 @@ const DEFAULT_STYLE = {
 };
 
 const CREATE_LINKS = [
-  { id: "create-component", label: "Create component diagram", template: "component" },
-  { id: "create-sequence", label: "Create sequence diagram", template: "sequence" },
-  { id: "create-geometry", label: "Create geometry diagram", template: "geometry" },
+  { id: "create-diagram", label: "Create diagram", template: "component" },
 ];
 
 const getShapeDefaults = (type) => {
@@ -521,7 +519,7 @@ const GEOMETRY_SHAPES = [
 ];
 
 const DIAGRAM_TEMPLATES = {
-  component: { name: "Component Interaction", shapes: INITIAL_SHAPES },
+  component: { name: "Diagram", shapes: INITIAL_SHAPES },
   sequence: { name: "Calling Sequence", shapes: SEQUENCE_SHAPES },
   geometry: { name: "Geometry", shapes: GEOMETRY_SHAPES },
 };
