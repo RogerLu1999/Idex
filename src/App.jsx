@@ -1,26 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TOOL_ITEMS = [
-  { id: "component", label: "Component Box", icon: "🧩" },
-  { id: "arrow", label: "Arrow", icon: "➡️" },
-  { id: "sequence", label: "Sequence Lifeline", icon: "📍" },
-  { id: "rect", label: "Rectangle", icon: "▭" },
-  { id: "rounded", label: "Rounded Rect", icon: "▢" },
-  { id: "circle", label: "Circle", icon: "⚪" },
-  { id: "sphere", label: "Sphere", icon: "◎" },
-  { id: "cylinder", label: "Cylinder", icon: "⬭" },
-  { id: "diamond", label: "Diamond", icon: "🔷" },
-  { id: "hexagon", label: "Hexagon", icon: "⬡" },
-  { id: "parallelogram", label: "Parallelogram", icon: "▱" },
-  { id: "trapezoid", label: "Trapezoid", icon: "⏢" },
-  { id: "isosceles-trapezoid", label: "Isosceles Trapezoid", icon: "⏥" },
-  { id: "right-trapezoid", label: "Right Trapezoid", icon: "⏢" },
-  { id: "right-triangle", label: "Right Triangle", icon: "◿" },
-  { id: "triangle", label: "Triangle", icon: "▲" },
-  { id: "line", label: "Line", icon: "➖" },
-  { id: "perp-line", label: "Perpendicular", icon: "⟂" },
-  { id: "perp-marker", label: "Perpendicular Marker", icon: "⊥" },
+  { id: "component", label: "Component Box", zhLabel: "组件框", icon: "🧩" },
+  { id: "arrow", label: "Arrow", zhLabel: "箭头", icon: "➡️" },
+  { id: "sequence", label: "Sequence Lifeline", zhLabel: "时序生命线", icon: "📍" },
+  { id: "rect", label: "Rectangle", zhLabel: "矩形", icon: "▭" },
+  { id: "rounded", label: "Rounded Rect", zhLabel: "圆角矩形", icon: "▢" },
+  { id: "circle", label: "Circle", zhLabel: "圆形", icon: "⚪" },
+  { id: "sphere", label: "Sphere", zhLabel: "球体", icon: "◎" },
+  { id: "cylinder", label: "Cylinder", zhLabel: "圆柱体", icon: "⬭" },
+  { id: "diamond", label: "Diamond", zhLabel: "菱形", icon: "🔷" },
+  { id: "hexagon", label: "Hexagon", zhLabel: "六边形", icon: "⬡" },
+  { id: "parallelogram", label: "Parallelogram", zhLabel: "平行四边形", icon: "▱" },
+  { id: "trapezoid", label: "Trapezoid", zhLabel: "梯形", icon: "⏢" },
+  { id: "isosceles-trapezoid", label: "Isosceles Trapezoid", zhLabel: "等腰梯形", icon: "⏥" },
+  { id: "right-trapezoid", label: "Right Trapezoid", zhLabel: "直角梯形", icon: "⏢" },
+  { id: "right-triangle", label: "Right Triangle", zhLabel: "直角三角形", icon: "◿" },
+  { id: "triangle", label: "Triangle", zhLabel: "三角形", icon: "▲" },
+  { id: "line", label: "Line", zhLabel: "直线", icon: "➖" },
+  { id: "perp-line", label: "Perpendicular", zhLabel: "垂直线", icon: "⟂" },
+  { id: "perp-marker", label: "Perpendicular Marker", zhLabel: "垂直标记", icon: "⊥" },
+  { id: "text", label: "Text", zhLabel: "文本", icon: "🔤" },
 ];
+
+const getToolTooltip = (tool) => `${tool.zhLabel} / ${tool.label}`;
 
 const INITIAL_SHAPES = [
   {
@@ -439,6 +442,21 @@ const getShapeDefaults = (type) => {
         rotation: 0,
         fillEffect: DEFAULT_STYLE.fillEffect,
         label: "",
+      };
+    case "text":
+      return {
+        width: 160,
+        height: 40,
+        stroke: DEFAULT_STYLE.stroke,
+        fill: "transparent",
+        strokeWidth: 1,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 16,
+        cornerRadius: 0,
+        rotation: 0,
+        fillEffect: "solid",
+        label: "文本",
       };
     case "rect":
     default:
@@ -1249,6 +1267,30 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
         </g>
       );
     }
+    case "text":
+      return (
+        <g key={shape.id} {...groupProps}>
+          <rect
+            {...commonProps}
+            x={shape.x}
+            y={shape.y}
+            width={shape.width}
+            height={shape.height}
+            fill="transparent"
+            stroke="transparent"
+          />
+          <text
+            x={shape.x + shape.width / 2}
+            y={shape.y + shape.height / 2}
+            style={{ fontSize: shape.fontSize }}
+            fill={shape.stroke}
+            textAnchor="middle"
+            dominantBaseline="middle"
+          >
+            {shape.label}
+          </text>
+        </g>
+      );
     case "sequence":
       return (
         <g key={shape.id} {...groupProps}>
@@ -2628,7 +2670,9 @@ export default function App() {
     selectedShape?.type
   );
   const supportsFill = selectedShape
-    ? !["line", "arrow", "perp-line", "perp-marker"].includes(selectedShape.type)
+    ? !["line", "arrow", "perp-line", "perp-marker", "text"].includes(
+        selectedShape.type
+      )
     : false;
   const supportsLineAnchor = selectedShape ? isLineShape(selectedShape) : false;
   const isTransparentFill = selectedShape?.fill === "transparent";
@@ -2817,13 +2861,13 @@ export default function App() {
               type="button"
               key={tool.id}
               onClick={() => handleAddShape(tool.id)}
-              aria-label={tool.label}
-              title={tool.label}
+              aria-label={getToolTooltip(tool)}
+              title={getToolTooltip(tool)}
             >
               <span className="tool-icon" aria-hidden="true">
                 {tool.icon}
               </span>
-              <span className="sr-only">{tool.label}</span>
+              <span className="sr-only">{getToolTooltip(tool)}</span>
             </button>
           ))}
         </div>
