@@ -2953,6 +2953,9 @@ export default function App() {
               <span className="tool-icon" aria-hidden="true">
                 {tool.icon}
               </span>
+              <span className="tool-label" aria-hidden="true">
+                {tool.zhLabel}
+              </span>
               <span className="sr-only">{getToolTooltip(tool)}</span>
             </button>
           ))}
