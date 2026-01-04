@@ -2075,30 +2075,105 @@ const cloneShape = (shape) => ({
 
 const cloneShapes = (shapes) => shapes.map((shape) => cloneShape(shape));
 
+const STORAGE_KEY = "idex-diagrams-v1";
+
+const createDefaultDiagrams = () => [
+  {
+    id: "diagram-1",
+    name: DIAGRAM_TEMPLATES.component.name,
+    shapes: cloneShapes(DIAGRAM_TEMPLATES.component.shapes),
+  },
+  {
+    id: "diagram-2",
+    name: DIAGRAM_TEMPLATES.sequence.name,
+    shapes: cloneShapes(DIAGRAM_TEMPLATES.sequence.shapes),
+  },
+  {
+    id: "diagram-3",
+    name: DIAGRAM_TEMPLATES.geometry.name,
+    shapes: cloneShapes(DIAGRAM_TEMPLATES.geometry.shapes),
+  },
+];
+
+const getDiagramCounterFromIds = (diagrams) => {
+  const ids = diagrams.map((diagram) => diagram.id);
+  const numbers = ids
+    .map((id) => {
+      const match = /^diagram-(\d+)$/.exec(id);
+      return match ? Number(match[1]) : null;
+    })
+    .filter((value) => Number.isFinite(value));
+  return numbers.length > 0 ? Math.max(...numbers) : diagrams.length;
+};
+
+const getInitialDiagramState = () => {
+  const fallback = {
+    diagrams: createDefaultDiagrams(),
+    activeDiagramId: "diagram-1",
+  };
+
+  if (typeof window === "undefined") {
+    return {
+      ...fallback,
+      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
+    };
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    return {
+      ...fallback,
+      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const storedDiagrams = Array.isArray(parsed?.diagrams) ? parsed.diagrams : null;
+    if (!storedDiagrams || storedDiagrams.length === 0) {
+      return {
+        ...fallback,
+        diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
+      };
+    }
+    const normalized = storedDiagrams
+      .filter((diagram) => diagram && typeof diagram.id === "string")
+      .map((diagram) => ({
+        ...diagram,
+        shapes: Array.isArray(diagram.shapes) ? diagram.shapes : [],
+        name: diagram.name ?? "Diagram",
+      }));
+    const activeId =
+      typeof parsed?.activeDiagramId === "string"
+        ? parsed.activeDiagramId
+        : normalized[0]?.id;
+    const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
+      ? activeId
+      : normalized[0]?.id;
+    return {
+      diagrams: normalized,
+      activeDiagramId: safeActiveId ?? null,
+      diagramCounter: getDiagramCounterFromIds(normalized),
+    };
+  } catch (error) {
+    return {
+      ...fallback,
+      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
+    };
+  }
+};
+
 export default function App() {
-  const [diagrams, setDiagrams] = useState(() => [
-    {
-      id: "diagram-1",
-      name: DIAGRAM_TEMPLATES.component.name,
-      shapes: cloneShapes(DIAGRAM_TEMPLATES.component.shapes),
-    },
-    {
-      id: "diagram-2",
-      name: DIAGRAM_TEMPLATES.sequence.name,
-      shapes: cloneShapes(DIAGRAM_TEMPLATES.sequence.shapes),
-    },
-    {
-      id: "diagram-3",
-      name: DIAGRAM_TEMPLATES.geometry.name,
-      shapes: cloneShapes(DIAGRAM_TEMPLATES.geometry.shapes),
-    },
-  ]);
-  const [activeDiagramId, setActiveDiagramId] = useState("diagram-1");
+  const initialDiagramState = useMemo(() => getInitialDiagramState(), []);
+  const [diagrams, setDiagrams] = useState(initialDiagramState.diagrams);
+  const [activeDiagramId, setActiveDiagramId] = useState(
+    initialDiagramState.activeDiagramId
+  );
   const [selectedIds, setSelectedIds] = useState([]);
   const [snapGuides, setSnapGuides] = useState([]);
   const [showGrid, setShowGrid] = useState(true);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
-  const diagramCounter = useRef(3);
+  const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
   const activeDiagram = useMemo(
     () => diagrams.find((diagram) => diagram.id === activeDiagramId),
@@ -2114,6 +2189,17 @@ export default function App() {
     () => selectedIds.map((id) => shapes.find((shape) => shape.id === id)).filter(Boolean),
     [selectedIds, shapes]
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const payload = {
+      diagrams,
+      activeDiagramId,
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }, [activeDiagramId, diagrams]);
 
   useEffect(() => {
     setTriangleAngleDrafts({});
