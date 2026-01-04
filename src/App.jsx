@@ -2525,8 +2525,8 @@ export default function App() {
         if (drag.mode === "resize") {
           const dx = x - drag.originX;
           const dy = y - drag.originY;
-          const minWidth = 20;
-          const minHeight = ["line", "arrow"].includes(shape.type) ? 0 : 20;
+          const minWidth = 1;
+          const minHeight = 1;
           const maxWidth = 400;
           const maxHeight = 300;
           let nextWidth = drag.startWidth;
@@ -3063,11 +3063,11 @@ export default function App() {
                   <input
                     id="shape-width"
                     type="number"
-                    min="20"
+                    min="1"
                     max="400"
                     value={selectedShape.width}
                     onChange={(event) =>
-                      updateNumericField("width", event.target.value, 20, 400)
+                      updateNumericField("width", event.target.value, 1, 400)
                     }
                   />
                 </div>
@@ -3076,11 +3076,11 @@ export default function App() {
                   <input
                     id="shape-height"
                     type="number"
-                    min="0"
+                    min="1"
                     max="300"
                     value={selectedShape.height}
                     onChange={(event) =>
-                      updateNumericField("height", event.target.value, 0, 300)
+                      updateNumericField("height", event.target.value, 1, 300)
                     }
                   />
                 </div>
