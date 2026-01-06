@@ -2256,6 +2256,13 @@ export default function App() {
       if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
         return;
       }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") {
+        if (shapes.length > 0) {
+          event.preventDefault();
+          setSelectedIds(shapes.map((shape) => shape.id));
+        }
+        return;
+      }
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
         const step = event.shiftKey ? 10 : 1;
         const deltaMap = {
@@ -2289,7 +2296,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeDiagramId, moveSelectedShapes, selectedIds]);
+  }, [activeDiagramId, moveSelectedShapes, selectedIds, shapes]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -2481,20 +2488,48 @@ export default function App() {
   };
 
   const handlePointerDown = (event, shape) => {
-    const { x, y } = getPointerPosition(event);
-    dragState.current = {
-      id: shape.id,
-      mode: "move",
-      offsetX: x - shape.x,
-      offsetY: y - shape.y,
-    };
     if (event.shiftKey) {
       setSelectedIds((prev) =>
         prev.includes(shape.id) ? prev.filter((item) => item !== shape.id) : [...prev, shape.id]
       );
-    } else {
-      setSelectedIds([shape.id]);
+      return;
     }
+    const { x, y } = getPointerPosition(event);
+    const nextSelectedIds = selectedIds.includes(shape.id)
+      ? selectedIds
+      : [shape.id];
+    setSelectedIds(nextSelectedIds);
+    const startShapes = new Map(
+      nextSelectedIds
+        .map((id) => shapes.find((item) => item.id === id))
+        .filter(Boolean)
+        .map((item) => [item.id, cloneShape(item)])
+    );
+    const selectionBounds = nextSelectedIds.reduce(
+      (acc, id) => {
+        const current = startShapes.get(id);
+        if (!current) {
+          return acc;
+        }
+        const bounds = getShapeBounds(current);
+        return {
+          minX: Math.min(acc.minX, bounds.x),
+          minY: Math.min(acc.minY, bounds.y),
+          maxX: Math.max(acc.maxX, bounds.x + bounds.width),
+          maxY: Math.max(acc.maxY, bounds.y + bounds.height),
+        };
+      },
+      { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+    dragState.current = {
+      id: shape.id,
+      mode: "move",
+      startPointerX: x,
+      startPointerY: y,
+      selectedIds: nextSelectedIds,
+      startShapes,
+      selectionBounds,
+    };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
@@ -2572,10 +2607,89 @@ export default function App() {
     }
     const drag = dragState.current;
     const { x, y } = getPointerPosition(event);
-    updateActiveShapes((prev) =>
-      prev.map((shape) => {
-        if (shape.id !== drag.id) {
+    updateActiveShapes((prev) => {
+      let moveDelta = null;
+      if (drag.mode === "move") {
+        const anchorShape = drag.startShapes?.get(drag.id) ?? prev.find((item) => item.id === drag.id);
+        if (anchorShape) {
+          const selectionBounds = drag.selectionBounds ?? {
+            minX: anchorShape.x,
+            minY: anchorShape.y,
+            maxX: anchorShape.x + anchorShape.width,
+            maxY: anchorShape.y + anchorShape.height,
+          };
+          const deltaX = x - drag.startPointerX;
+          const deltaY = y - drag.startPointerY;
+          const minDeltaX = -selectionBounds.minX;
+          const maxDeltaX = CANVAS_WIDTH - selectionBounds.maxX;
+          const minDeltaY = -selectionBounds.minY;
+          const maxDeltaY = CANVAS_HEIGHT - selectionBounds.maxY;
+          const otherShapes = drag.selectedIds
+            ? prev.filter((item) => !drag.selectedIds.includes(item.id))
+            : prev;
+          const anchorBounds = getShapeBounds(anchorShape);
+          const rawX = clampNumber(
+            anchorBounds.x + deltaX,
+            0,
+            CANVAS_WIDTH - anchorBounds.width
+          );
+          const rawY = clampNumber(
+            anchorBounds.y + deltaY,
+            0,
+            CANVAS_HEIGHT - anchorBounds.height
+          );
+          const { x: snappedX, y: snappedY, guides } = getSnapResult(
+            anchorShape,
+            otherShapes,
+            rawX,
+            rawY
+          );
+          const vertexSnap = getLineVertexSnap(anchorShape, otherShapes, snappedX, snappedY);
+          const finalX = vertexSnap?.x ?? snappedX;
+          const finalY = vertexSnap?.y ?? snappedY;
+          const markerSnap = getPerpMarkerSnap(anchorShape, otherShapes, finalX, finalY);
+          const appliedX = markerSnap?.x ?? finalX;
+          const appliedY = markerSnap?.y ?? finalY;
+          setSnapGuides(markerSnap || vertexSnap ? [] : guides);
+          const snappedDeltaX = clampNumber(
+            appliedX - anchorBounds.x,
+            minDeltaX,
+            maxDeltaX
+          );
+          const snappedDeltaY = clampNumber(
+            appliedY - anchorBounds.y,
+            minDeltaY,
+            maxDeltaY
+          );
+          moveDelta = {
+            x: snappedDeltaX,
+            y: snappedDeltaY,
+            rotation: markerSnap?.rotation,
+          };
+        }
+      }
+
+      return prev.map((shape) => {
+        if (drag.mode !== "move" && shape.id !== drag.id) {
           return shape;
+        }
+        if (drag.mode === "move") {
+          if (!drag.selectedIds?.includes(shape.id) || !moveDelta) {
+            return shape;
+          }
+          const startShape = drag.startShapes?.get(shape.id) ?? shape;
+          const movedShape = translateShape(startShape, moveDelta.x, moveDelta.y);
+          if (
+            shape.id === drag.id &&
+            moveDelta.rotation != null &&
+            (drag.selectedIds?.length ?? 1) === 1
+          ) {
+            return {
+              ...movedShape,
+              rotation: moveDelta.rotation,
+            };
+          }
+          return movedShape;
         }
         if (drag.mode === "vertex" && shape.type === "triangle") {
           const nextPoints = (shape.points ?? []).map((point, index) =>
@@ -2688,57 +2802,9 @@ export default function App() {
             rotation: Math.round(normalizedRotation),
           };
         }
-        const nextX = x - drag.offsetX;
-        const nextY = y - drag.offsetY;
-        const maxX = CANVAS_WIDTH - shape.width;
-        const maxY = CANVAS_HEIGHT - shape.height;
-        const { x: snappedX, y: snappedY, guides } = getSnapResult(
-          shape,
-          prev,
-          clampNumber(nextX, 0, maxX),
-          clampNumber(nextY, 0, maxY)
-        );
-        const vertexSnap = getLineVertexSnap(shape, prev, snappedX, snappedY);
-        const finalX = vertexSnap?.x ?? snappedX;
-        const finalY = vertexSnap?.y ?? snappedY;
-        const markerSnap = getPerpMarkerSnap(shape, prev, finalX, finalY);
-        const appliedX = markerSnap?.x ?? finalX;
-        const appliedY = markerSnap?.y ?? finalY;
-        setSnapGuides(markerSnap || vertexSnap ? [] : guides);
-        const deltaX = appliedX - shape.x;
-        const deltaY = appliedY - shape.y;
-        if (shape.type === "compound") {
-          return translateShape(shape, deltaX, deltaY);
-        }
-        const movedLabels = shape.vertexLabels
-          ? shape.vertexLabels.map((label) => ({
-              ...label,
-              x: label.x + deltaX,
-              y: label.y + deltaY,
-            }))
-          : shape.vertexLabels;
-        if (shape.type === "triangle" && shape.points) {
-          const movedPoints = shape.points.map((point) => ({
-            x: point.x + deltaX,
-            y: point.y + deltaY,
-          }));
-          return {
-            ...shape,
-            x: appliedX,
-            y: appliedY,
-            points: movedPoints,
-            vertexLabels: movedLabels,
-          };
-        }
-        return {
-          ...shape,
-          x: appliedX,
-          y: appliedY,
-          vertexLabels: movedLabels,
-          rotation: markerSnap?.rotation ?? shape.rotation,
-        };
+        return shape;
       })
-    );
+    });
   };
 
   const handlePointerUp = () => {
