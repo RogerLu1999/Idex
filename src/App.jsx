@@ -1675,7 +1675,10 @@ const DiagramCanvas = ({
   snapGuides,
   selectedShape,
   showGrid,
+  selectionBox,
   onSelect,
+  onCanvasClick,
+  onCanvasPointerDown,
   onPointerDown,
   onResizePointerDown,
   onRotatePointerDown,
@@ -1769,7 +1772,8 @@ const DiagramCanvas = ({
     <svg
       className="canvas"
       viewBox="0 0 1000 700"
-      onClick={() => onSelect(null)}
+      onClick={onCanvasClick}
+      onPointerDown={onCanvasPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
@@ -1836,6 +1840,15 @@ const DiagramCanvas = ({
         onPointerDown
       )
     )}
+    {selectionBox ? (
+      <rect
+        className="selection-box"
+        x={selectionBox.x}
+        y={selectionBox.y}
+        width={selectionBox.width}
+        height={selectionBox.height}
+      />
+    ) : null}
     {shapes.flatMap((shape) =>
       (shape.vertexLabels ?? []).map((label) => (
         <g
@@ -2172,9 +2185,11 @@ export default function App() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [snapGuides, setSnapGuides] = useState([]);
   const [showGrid, setShowGrid] = useState(true);
+  const [selectionBox, setSelectionBox] = useState(null);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
+  const suppressCanvasClick = useRef(false);
   const activeDiagram = useMemo(
     () => diagrams.find((diagram) => diagram.id === activeDiagramId),
     [activeDiagramId, diagrams]
@@ -2204,6 +2219,23 @@ export default function App() {
   useEffect(() => {
     setTriangleAngleDrafts({});
   }, [selectedId]);
+
+  const isMultiSelectModifier = (event) =>
+    event?.shiftKey || event?.metaKey || event?.ctrlKey;
+
+  const getSelectionBounds = (startX, startY, endX, endY) => ({
+    minX: Math.min(startX, endX),
+    minY: Math.min(startY, endY),
+    maxX: Math.max(startX, endX),
+    maxY: Math.max(startY, endY),
+  });
+
+  const getSelectionBoxFromBounds = ({ minX, minY, maxX, maxY }) => ({
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  });
 
   useEffect(() => {
     const firstId = shapes[0]?.id;
@@ -2488,7 +2520,7 @@ export default function App() {
   };
 
   const handlePointerDown = (event, shape) => {
-    if (event.shiftKey) {
+    if (isMultiSelectModifier(event)) {
       setSelectedIds((prev) =>
         prev.includes(shape.id) ? prev.filter((item) => item !== shape.id) : [...prev, shape.id]
       );
@@ -2607,6 +2639,41 @@ export default function App() {
     }
     const drag = dragState.current;
     const { x, y } = getPointerPosition(event);
+    if (drag.mode === "selection") {
+      const bounds = getSelectionBounds(
+        drag.startPointerX,
+        drag.startPointerY,
+        x,
+        y
+      );
+      setSelectionBox(getSelectionBoxFromBounds(bounds));
+      const hasMoved =
+        Math.abs(x - drag.startPointerX) > 2 || Math.abs(y - drag.startPointerY) > 2;
+      drag.hasMoved = drag.hasMoved || hasMoved;
+      const matchedIds = shapes
+        .filter((shape) => {
+          const shapeBounds = getShapeBounds(shape);
+          const shapeMinX = shapeBounds.x;
+          const shapeMinY = shapeBounds.y;
+          const shapeMaxX = shapeBounds.x + shapeBounds.width;
+          const shapeMaxY = shapeBounds.y + shapeBounds.height;
+          return !(
+            shapeMaxX < bounds.minX ||
+            shapeMinX > bounds.maxX ||
+            shapeMaxY < bounds.minY ||
+            shapeMinY > bounds.maxY
+          );
+        })
+        .map((shape) => shape.id);
+      if (drag.additive) {
+        const base = new Set(drag.baseSelectedIds ?? []);
+        matchedIds.forEach((id) => base.add(id));
+        setSelectedIds(shapes.map((shape) => shape.id).filter((id) => base.has(id)));
+      } else {
+        setSelectedIds(matchedIds);
+      }
+      return;
+    }
     updateActiveShapes((prev) => {
       let moveDelta = null;
       if (drag.mode === "move") {
@@ -2808,8 +2875,12 @@ export default function App() {
   };
 
   const handlePointerUp = () => {
+    if (dragState.current?.mode === "selection" && dragState.current?.hasMoved) {
+      suppressCanvasClick.current = true;
+    }
     dragState.current = null;
     setSnapGuides([]);
+    setSelectionBox(null);
   };
 
   const dashedOptions = [
@@ -2840,13 +2911,36 @@ export default function App() {
       setSelectedIds([]);
       return;
     }
-    if (event?.shiftKey) {
+    if (isMultiSelectModifier(event)) {
       setSelectedIds((prev) =>
         prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
       );
       return;
     }
     setSelectedIds([id]);
+  };
+
+  const handleCanvasPointerDown = (event) => {
+    const { x, y } = getPointerPosition(event);
+    dragState.current = {
+      mode: "selection",
+      startPointerX: x,
+      startPointerY: y,
+      additive: isMultiSelectModifier(event),
+      baseSelectedIds: isMultiSelectModifier(event) ? selectedIds : [],
+      hasMoved: false,
+    };
+    setSelectionBox({ x, y, width: 0, height: 0 });
+    setSnapGuides([]);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handleCanvasClick = () => {
+    if (suppressCanvasClick.current) {
+      suppressCanvasClick.current = false;
+      return;
+    }
+    setSelectedIds([]);
   };
 
   const handleDeleteSelected = () => {
@@ -3112,7 +3206,10 @@ export default function App() {
             snapGuides={snapGuides}
             selectedShape={selectedShape}
             showGrid={showGrid}
+            selectionBox={selectionBox}
             onSelect={handleSelectShape}
+            onCanvasClick={handleCanvasClick}
+            onCanvasPointerDown={handleCanvasPointerDown}
             onPointerDown={handlePointerDown}
             onResizePointerDown={handleResizePointerDown}
             onRotatePointerDown={handleRotatePointerDown}
