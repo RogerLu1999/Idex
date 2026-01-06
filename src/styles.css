@@ -290,6 +290,14 @@ body {
   stroke-dasharray: 6 4;
 }
 
+.selection-box {
+  fill: rgba(37, 99, 235, 0.12);
+  stroke: #2563eb;
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
 .selection-handle {
   fill: #ffffff;
   stroke: #2563eb;
