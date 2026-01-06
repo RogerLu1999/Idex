@@ -252,6 +252,7 @@ body {
 }
 
 .canvas {
+  display: block;
   width: 100%;
   height: 100%;
   min-height: 560px;
@@ -259,6 +260,7 @@ body {
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   touch-action: none;
+  overflow: hidden;
 }
 
 .canvas-grid {
