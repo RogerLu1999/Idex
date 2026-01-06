@@ -1674,6 +1674,7 @@ const DiagramCanvas = ({
   dragId,
   snapGuides,
   selectedShape,
+  selectedShapes,
   showGrid,
   selectionBox,
   onSelect,
@@ -1767,6 +1768,22 @@ const DiagramCanvas = ({
         ]
     : [];
   const rotationCenter = selectedShape ? getShapeRotationCenter(selectedShape) : null;
+  const multiSelectionOutlines = (selectedShapes ?? []).filter(Boolean).map((shape) => {
+    const isLine = ["line", "arrow"].includes(shape.type);
+    const padding = isLine ? 6 : 0;
+    const outlineHeight = isLine ? Math.max(12, shape.height) : shape.height;
+    const outlineY = shape.y - padding;
+    return (
+      <rect
+        key={`multi-outline-${shape.id}`}
+        className="selection-outline selection-outline--multi"
+        x={shape.x}
+        y={outlineY}
+        width={shape.width}
+        height={outlineHeight}
+      />
+    );
+  });
 
   return (
     <svg
@@ -1848,6 +1865,9 @@ const DiagramCanvas = ({
         width={selectionBox.width}
         height={selectionBox.height}
       />
+    ) : null}
+    {selectedShapes?.length > 1 ? (
+      <g className="selection-layer">{multiSelectionOutlines}</g>
     ) : null}
     {shapes.flatMap((shape) =>
       (shape.vertexLabels ?? []).map((label) => (
@@ -2088,6 +2108,12 @@ const cloneShape = (shape) => ({
 
 const cloneShapes = (shapes) => shapes.map((shape) => cloneShape(shape));
 
+const cloneDiagrams = (diagrams) =>
+  diagrams.map((diagram) => ({
+    ...diagram,
+    shapes: cloneShapes(diagram.shapes ?? []),
+  }));
+
 const STORAGE_KEY = "idex-diagrams-v1";
 
 const createDefaultDiagrams = () => [
@@ -2187,6 +2213,7 @@ export default function App() {
   const [showGrid, setShowGrid] = useState(true);
   const [selectionBox, setSelectionBox] = useState(null);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
+  const [history, setHistory] = useState({ past: [], future: [] });
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
   const suppressCanvasClick = useRef(false);
@@ -2204,6 +2231,28 @@ export default function App() {
     () => selectedIds.map((id) => shapes.find((shape) => shape.id === id)).filter(Boolean),
     [selectedIds, shapes]
   );
+
+  const createHistorySnapshot = useCallback(
+    () => ({
+      diagrams: cloneDiagrams(diagrams),
+      activeDiagramId,
+    }),
+    [activeDiagramId, diagrams]
+  );
+
+  const pushHistorySnapshot = useCallback((snapshot) => {
+    if (!snapshot) {
+      return;
+    }
+    setHistory((prev) => ({
+      past: [...prev.past, snapshot],
+      future: [],
+    }));
+  }, []);
+
+  const recordHistory = useCallback(() => {
+    pushHistorySnapshot(createHistorySnapshot());
+  }, [createHistorySnapshot, pushHistorySnapshot]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -2259,6 +2308,7 @@ export default function App() {
     if (selectedIds.length === 0) {
       return;
     }
+    recordHistory();
     updateActiveShapes((prev) =>
       prev.map((shape) => {
         if (!selectedIds.includes(shape.id)) {
@@ -2281,11 +2331,37 @@ export default function App() {
       })
     );
     setSnapGuides([]);
-  }, [selectedIds, updateActiveShapes]);
+  }, [recordHistory, selectedIds, updateActiveShapes]);
+
+  const handleUndo = useCallback(() => {
+    setHistory((prev) => {
+      if (prev.past.length === 0) {
+        return prev;
+      }
+      const previous = prev.past[prev.past.length - 1];
+      const nextPast = prev.past.slice(0, -1);
+      const currentSnapshot = createHistorySnapshot();
+      setDiagrams(previous.diagrams);
+      setActiveDiagramId(previous.activeDiagramId);
+      diagramCounter.current = getDiagramCounterFromIds(previous.diagrams);
+      setSelectedIds([]);
+      setSnapGuides([]);
+      setSelectionBox(null);
+      return {
+        past: nextPast,
+        future: [currentSnapshot, ...prev.future],
+      };
+    });
+  }, [createHistorySnapshot]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) {
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        handleUndo();
         return;
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") {
@@ -2311,6 +2387,10 @@ export default function App() {
         return;
       }
       if (event.key === "Delete" || event.key === "Backspace") {
+        if (selectedIds.length === 0) {
+          return;
+        }
+        recordHistory();
         setDiagrams((prev) =>
           prev.map((diagram) =>
             diagram.id === activeDiagramId
@@ -2328,7 +2408,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeDiagramId, moveSelectedShapes, selectedIds, shapes]);
+  }, [activeDiagramId, handleUndo, moveSelectedShapes, recordHistory, selectedIds, shapes]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
@@ -2355,6 +2435,7 @@ export default function App() {
         angles,
       };
     }
+    recordHistory();
     updateActiveShapes((prev) => [...prev, newShape]);
     setSelectedIds([newShape.id]);
   };
@@ -2363,6 +2444,7 @@ export default function App() {
     if (!selectedShape) {
       return;
     }
+    recordHistory();
     updateActiveShapes((prev) =>
       prev.map((shape) =>
             shape.id === selectedShape.id
@@ -2445,6 +2527,7 @@ export default function App() {
     if (!selectedShape || selectedShape.type !== "triangle") {
       return;
     }
+    recordHistory();
     const currentAngles = selectedShape.angles ?? [60, 60, 60];
     const nextAngles = [...currentAngles];
     nextAngles[index] = clampAngle(value);
@@ -2476,6 +2559,7 @@ export default function App() {
     if (!selectedShape) {
       return;
     }
+    recordHistory();
     const labels = createVertexLabels(selectedShape);
     updateActiveShapes((prev) =>
       prev.map((shape) =>
@@ -2493,6 +2577,7 @@ export default function App() {
     if (!selectedShape) {
       return;
     }
+    recordHistory();
     updateActiveShapes((prev) =>
       prev.map((shape) =>
         shape.id === selectedShape.id
@@ -2561,6 +2646,8 @@ export default function App() {
       selectedIds: nextSelectedIds,
       startShapes,
       selectionBounds,
+      historySnapshot: createHistorySnapshot(),
+      hasMoved: false,
     };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -2573,6 +2660,8 @@ export default function App() {
       handle,
       originX: x,
       originY: y,
+      startPointerX: x,
+      startPointerY: y,
       startX: shape.x,
       startY: shape.y,
       startWidth: shape.width,
@@ -2581,6 +2670,8 @@ export default function App() {
       startLabels: shape.vertexLabels ? [...shape.vertexLabels] : null,
       startCompound:
         shape.type === "compound" ? JSON.parse(JSON.stringify(shape)) : null,
+      historySnapshot: createHistorySnapshot(),
+      hasMoved: false,
     };
     setSelectedIds([shape.id]);
     event.stopPropagation();
@@ -2598,6 +2689,10 @@ export default function App() {
       centerY,
       startPointerAngle,
       startAngle: shape.rotation ?? 0,
+      startPointerX: x,
+      startPointerY: y,
+      historySnapshot: createHistorySnapshot(),
+      hasMoved: false,
     };
     setSelectedIds([shape.id]);
     event.stopPropagation();
@@ -2605,10 +2700,15 @@ export default function App() {
   };
 
   const handleVertexPointerDown = (event, shape, vertexIndex) => {
+    const { x, y } = getPointerPosition(event);
     dragState.current = {
       id: shape.id,
       mode: "vertex",
       vertexIndex,
+      startPointerX: x,
+      startPointerY: y,
+      historySnapshot: createHistorySnapshot(),
+      hasMoved: false,
     };
     setSelectedIds([shape.id]);
     event.stopPropagation();
@@ -2627,6 +2727,10 @@ export default function App() {
       labelId,
       offsetX: x - label.x,
       offsetY: y - label.y,
+      startPointerX: x,
+      startPointerY: y,
+      historySnapshot: createHistorySnapshot(),
+      hasMoved: false,
     };
     setSelectedIds([shape.id]);
     event.stopPropagation();
@@ -2639,6 +2743,11 @@ export default function App() {
     }
     const drag = dragState.current;
     const { x, y } = getPointerPosition(event);
+    if (drag.mode !== "selection") {
+      const hasMoved =
+        Math.abs(x - drag.startPointerX) > 1 || Math.abs(y - drag.startPointerY) > 1;
+      drag.hasMoved = drag.hasMoved || hasMoved;
+    }
     if (drag.mode === "selection") {
       const bounds = getSelectionBounds(
         drag.startPointerX,
@@ -2878,6 +2987,9 @@ export default function App() {
     if (dragState.current?.mode === "selection" && dragState.current?.hasMoved) {
       suppressCanvasClick.current = true;
     }
+    if (dragState.current?.hasMoved && dragState.current?.historySnapshot) {
+      pushHistorySnapshot(dragState.current.historySnapshot);
+    }
     dragState.current = null;
     setSnapGuides([]);
     setSelectionBox(null);
@@ -2947,6 +3059,7 @@ export default function App() {
     if (selectedIds.length === 0) {
       return;
     }
+    recordHistory();
     updateActiveShapes((prev) =>
       prev.filter((shape) => !selectedIds.includes(shape.id))
     );
@@ -2961,6 +3074,7 @@ export default function App() {
     if (!canBooleanOps) {
       return;
     }
+    recordHistory();
     const [first, second] = selectedShapes;
     const bounds = [first, second].reduce(
       (acc, shape) => {
@@ -3005,6 +3119,7 @@ export default function App() {
     if (!canBooleanOps) {
       return;
     }
+    recordHistory();
     const [baseShape, cutterShape] = selectedShapes;
     const bounds = getShapeBounds(baseShape);
     const clippedShape = {
@@ -3051,11 +3166,29 @@ export default function App() {
     if (!trimmedName) {
       return;
     }
+    recordHistory();
     setDiagrams((prev) =>
       prev.map((item) =>
         item.id === diagramId ? { ...item, name: trimmedName } : item
       )
     );
+  };
+
+  const handleDuplicateDiagram = (diagramId) => {
+    const diagram = diagrams.find((item) => item.id === diagramId);
+    if (!diagram) {
+      return;
+    }
+    recordHistory();
+    const nextIndex = diagramCounter.current + 1;
+    diagramCounter.current = nextIndex;
+    const newDiagram = {
+      id: `diagram-${nextIndex}`,
+      name: `${diagram.name} Copy`,
+      shapes: cloneShapes(diagram.shapes ?? []),
+    };
+    setDiagrams((prev) => [...prev, newDiagram]);
+    setActiveDiagramId(newDiagram.id);
   };
 
   const handleDeleteDiagram = (diagramId) => {
@@ -3069,6 +3202,7 @@ export default function App() {
     if (!shouldDelete) {
       return;
     }
+    recordHistory();
     setDiagrams((prev) => {
       const next = prev.filter((item) => item.id !== diagramId);
       if (diagramId === activeDiagramId) {
@@ -3083,6 +3217,7 @@ export default function App() {
     if (!template) {
       return;
     }
+    recordHistory();
     const nextIndex = diagramCounter.current + 1;
     diagramCounter.current = nextIndex;
     const newDiagram = {
@@ -3159,6 +3294,16 @@ export default function App() {
                       <button
                         type="button"
                         className="diagram-icon-button"
+                        onClick={() => handleDuplicateDiagram(diagram.id)}
+                        aria-label={`Duplicate ${diagram.name}`}
+                        title="Duplicate"
+                      >
+                        <span aria-hidden="true">📄</span>
+                        <span className="sr-only">Duplicate</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="diagram-icon-button"
                         onClick={() => handleRenameDiagram(diagram.id)}
                         aria-label={`Rename ${diagram.name}`}
                         title="Rename"
@@ -3196,6 +3341,17 @@ export default function App() {
                 />
                 <span>Grid</span>
               </label>
+              {selectedIds.length > 1 ? (
+                <span className="selection-count">{`Selected ${selectedIds.length}`}</span>
+              ) : null}
+              <button
+                type="button"
+                className="control-button"
+                onClick={handleUndo}
+                disabled={history.past.length === 0}
+              >
+                Undo
+              </button>
               <span className="status">Auto-save enabled</span>
             </div>
           </div>
@@ -3205,6 +3361,7 @@ export default function App() {
             dragId={dragState.current?.id}
             snapGuides={snapGuides}
             selectedShape={selectedShape}
+            selectedShapes={selectedShapes}
             showGrid={showGrid}
             selectionBox={selectionBox}
             onSelect={handleSelectShape}

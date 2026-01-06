@@ -231,6 +231,35 @@ body {
   gap: 12px;
 }
 
+.control-button {
+  border: none;
+  background: #e2e8f0;
+  color: #1e293b;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.control-button:hover:not(:disabled) {
+  background: #cbd5f5;
+}
+
+.control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.selection-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #e0e7ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
 .grid-toggle {
   display: inline-flex;
   align-items: center;
@@ -288,6 +317,11 @@ body {
   stroke: #2563eb;
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
+}
+
+.selection-outline--multi {
+  stroke: #38bdf8;
+  stroke-dasharray: 4 3;
 }
 
 .selection-box {
