@@ -164,6 +164,7 @@ const DEFAULT_STYLE = {
   cornerRadius: 0,
   fillEffect: "solid",
 };
+const AUTO_LABEL_FONT_SIZE = 11;
 
 const CREATE_LINKS = [
   { id: "create-diagram", label: "Create diagram", template: "component" },
@@ -452,7 +453,7 @@ const getShapeDefaults = (type) => {
         strokeWidth: 1,
         dash: "solid",
         fillOpacity: 1,
-        fontSize: 16,
+        fontSize: AUTO_LABEL_FONT_SIZE,
         cornerRadius: 0,
         rotation: 0,
         fillEffect: "solid",
@@ -1666,6 +1667,7 @@ const createVertexLabels = (shape) =>
     text: VERTEX_LETTERS[index] ?? `P${index + 1}`,
     x: vertex.x + 10,
     y: vertex.y - 12,
+    fontSize: AUTO_LABEL_FONT_SIZE,
   }));
 
 const DiagramCanvas = ({
@@ -1866,7 +1868,11 @@ const DiagramCanvas = ({
             height="20"
             rx="6"
           />
-          <text x={label.x} y={label.y - 2}>
+          <text
+            x={label.x}
+            y={label.y - 2}
+            style={{ fontSize: label.fontSize ?? AUTO_LABEL_FONT_SIZE }}
+          >
             {label.text}
           </text>
         </g>
@@ -2507,6 +2513,26 @@ export default function App() {
     );
   };
 
+  const updateVertexLabelFontSize = (value) => {
+    if (!selectedShape) {
+      return;
+    }
+    const nextFontSize = clampNumber(value, 8, 24);
+    updateActiveShapes((prev) =>
+      prev.map((shape) =>
+        shape.id === selectedShape.id
+          ? {
+              ...shape,
+              vertexLabels: (shape.vertexLabels ?? []).map((label) => ({
+                ...label,
+                fontSize: nextFontSize,
+              })),
+            }
+          : shape
+      )
+    );
+  };
+
   const getPointerPosition = (event) => {
     const svg = event.currentTarget.ownerSVGElement ?? event.currentTarget;
     if (!svg) {
@@ -2905,6 +2931,8 @@ export default function App() {
     selectedShape?.type === "triangle"
       ? selectedShape.angles ?? getTriangleAnglesFromPoints(selectedShape.points ?? [])
       : null;
+  const vertexLabelFontSize =
+    selectedShape?.vertexLabels?.[0]?.fontSize ?? AUTO_LABEL_FONT_SIZE;
 
   const handleSelectShape = (id, event) => {
     if (!id) {
@@ -3526,22 +3554,39 @@ export default function App() {
                     </button>
                   </div>
                   {(selectedShape.vertexLabels ?? []).length > 0 ? (
-                    <div className="vertex-label-inputs">
-                      {(selectedShape.vertexLabels ?? []).map((label, index) => (
-                        <div key={label.id}>
-                          <label htmlFor={`vertex-label-${label.id}`}>
-                            {`Label ${index + 1}`}
-                          </label>
+                    <>
+                      <div className="property-row split">
+                        <div>
+                          <label htmlFor="vertex-label-font-size">Label font size</label>
                           <input
-                            id={`vertex-label-${label.id}`}
-                            value={label.text}
+                            id="vertex-label-font-size"
+                            type="number"
+                            min="8"
+                            max="24"
+                            value={vertexLabelFontSize}
                             onChange={(event) =>
-                              updateVertexLabel(label.id, event.target.value)
+                              updateVertexLabelFontSize(event.target.value)
                             }
                           />
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                      <div className="vertex-label-inputs">
+                        {(selectedShape.vertexLabels ?? []).map((label, index) => (
+                          <div key={label.id}>
+                            <label htmlFor={`vertex-label-${label.id}`}>
+                              {`Label ${index + 1}`}
+                            </label>
+                            <input
+                              id={`vertex-label-${label.id}`}
+                              value={label.text}
+                              onChange={(event) =>
+                                updateVertexLabel(label.id, event.target.value)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   ) : (
                     <p className="helper-text">Create draggable labels for each vertex.</p>
                   )}
