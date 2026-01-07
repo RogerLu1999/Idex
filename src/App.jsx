@@ -1711,6 +1711,8 @@ const createVertexLabelShapes = (shape, startIndex) =>
       label: VERTEX_LETTERS[index] ?? `P${index + 1}`,
       fontSize: AUTO_LABEL_FONT_SIZE,
       stroke: shape.stroke ?? DEFAULT_STYLE.stroke,
+      vertexLabelFor: shape.id,
+      vertexLabelIndex: index,
     };
   });
 
@@ -2596,17 +2598,58 @@ export default function App() {
     );
   };
 
-  const handleAddVertexLabels = () => {
+  const handleAutoVertexLabels = (direction) => {
     if (!selectedShape) {
       return;
     }
+    const vertices = getShapeVertices(selectedShape);
+    if (vertices.length === 0) {
+      return;
+    }
     recordHistory();
+    const existingLabels = shapes
+      .filter(
+        (shape) =>
+          shape.type === "text" &&
+          shape.vertexLabelFor === selectedShape.id &&
+          Number.isFinite(shape.vertexLabelIndex)
+      )
+      .sort((a, b) => a.vertexLabelIndex - b.vertexLabelIndex);
+    const hasFullSet =
+      existingLabels.length === vertices.length &&
+      existingLabels.every((label, index) => label.vertexLabelIndex === index);
+    if (hasFullSet) {
+      const labels = existingLabels.map((label) => label.label);
+      const rotated =
+        direction === "clockwise"
+          ? [...labels.slice(1), labels[0]]
+          : [labels[labels.length - 1], ...labels.slice(0, -1)];
+      updateActiveShapes((prev) =>
+        prev.map((shape) => {
+          const labelIndex = existingLabels.findIndex((label) => label.id === shape.id);
+          if (labelIndex === -1) {
+            return shape;
+          }
+          return {
+            ...shape,
+            label: rotated[labelIndex],
+          };
+        })
+      );
+      return;
+    }
     const startIndex = shapes.length + 1;
     const labelShapes = createVertexLabelShapes(selectedShape, startIndex);
     if (labelShapes.length === 0) {
       return;
     }
-    updateActiveShapes((prev) => [...prev, ...labelShapes]);
+    updateActiveShapes((prev) => [
+      ...prev.filter(
+        (shape) =>
+          !(shape.type === "text" && shape.vertexLabelFor === selectedShape.id)
+      ),
+      ...labelShapes,
+    ]);
   };
 
   const getPointerPosition = (event) => {
@@ -3740,13 +3783,16 @@ export default function App() {
                 <div className="property-row">
                   <div className="vertex-label-row">
                     <span>Vertex labels</span>
-                    <button type="button" onClick={handleAddVertexLabels}>
-                      Auto label
+                    <button type="button" onClick={() => handleAutoVertexLabels("clockwise")}>
+                      Auto label ↻
+                    </button>
+                    <button type="button" onClick={() => handleAutoVertexLabels("counterclockwise")}>
+                      Auto label ↺
                     </button>
                   </div>
                   <p className="helper-text">
-                    Auto label adds separate text boxes near each vertex that can be moved or deleted
-                    individually.
+                    Auto label adds separate text boxes near each vertex, or rotates the existing labels
+                    clockwise/counterclockwise.
                   </p>
                 </div>
               ) : null}
