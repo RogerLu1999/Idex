@@ -2723,6 +2723,7 @@ export default function App() {
       id: shape.id,
       mode: "vertex",
       vertexIndex,
+      startPoints: shape.points ? shape.points.map((point) => ({ ...point })) : null,
       startPointerX: x,
       startPointerY: y,
       historySnapshot: createHistorySnapshot(),
@@ -2864,11 +2865,20 @@ export default function App() {
           return movedShape;
         }
         if (drag.mode === "vertex" && shape.type === "triangle") {
+          const startPoints = drag.startPoints ?? shape.points ?? [];
+          const startPoint =
+            startPoints[drag.vertexIndex] ?? shape.points?.[drag.vertexIndex];
+          if (!startPoint) {
+            return shape;
+          }
+          const precisionScale = event.shiftKey ? 1 : 0.25;
+          const deltaX = (x - drag.startPointerX) * precisionScale;
+          const deltaY = (y - drag.startPointerY) * precisionScale;
           const nextPoints = (shape.points ?? []).map((point, index) =>
             index === drag.vertexIndex
               ? {
-                  x: clampNumber(x, 0, CANVAS_WIDTH),
-                  y: clampNumber(y, 0, CANVAS_HEIGHT),
+                  x: clampNumber(startPoint.x + deltaX, 0, CANVAS_WIDTH),
+                  y: clampNumber(startPoint.y + deltaY, 0, CANVAS_HEIGHT),
                 }
               : point
           );
