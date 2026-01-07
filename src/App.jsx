@@ -171,9 +171,14 @@ const CREATE_LINKS = [
 ];
 
 const getShapeDefaults = (type) => {
+  const baseDefaults = {
+    flipX: false,
+    flipY: false,
+  };
   switch (type) {
     case "component":
       return {
+        ...baseDefaults,
         width: 180,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -189,6 +194,7 @@ const getShapeDefaults = (type) => {
       };
     case "sequence":
       return {
+        ...baseDefaults,
         width: 120,
         height: 180,
         stroke: DEFAULT_STYLE.stroke,
@@ -204,6 +210,7 @@ const getShapeDefaults = (type) => {
       };
     case "arrow":
       return {
+        ...baseDefaults,
         width: 120,
         height: 0,
         stroke: DEFAULT_STYLE.stroke,
@@ -220,6 +227,7 @@ const getShapeDefaults = (type) => {
       };
     case "right-triangle":
       return {
+        ...baseDefaults,
         width: 120,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -235,6 +243,7 @@ const getShapeDefaults = (type) => {
       };
     case "triangle":
       return {
+        ...baseDefaults,
         width: 140,
         height: 110,
         stroke: DEFAULT_STYLE.stroke,
@@ -250,6 +259,7 @@ const getShapeDefaults = (type) => {
       };
     case "circle":
       return {
+        ...baseDefaults,
         width: 110,
         height: 110,
         stroke: DEFAULT_STYLE.stroke,
@@ -265,6 +275,7 @@ const getShapeDefaults = (type) => {
       };
     case "sphere":
       return {
+        ...baseDefaults,
         width: 120,
         height: 120,
         stroke: DEFAULT_STYLE.stroke,
@@ -280,6 +291,7 @@ const getShapeDefaults = (type) => {
       };
     case "cylinder":
       return {
+        ...baseDefaults,
         width: 140,
         height: 120,
         stroke: DEFAULT_STYLE.stroke,
@@ -295,6 +307,7 @@ const getShapeDefaults = (type) => {
       };
     case "diamond":
       return {
+        ...baseDefaults,
         width: 130,
         height: 100,
         stroke: DEFAULT_STYLE.stroke,
@@ -310,6 +323,7 @@ const getShapeDefaults = (type) => {
       };
     case "hexagon":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -325,6 +339,7 @@ const getShapeDefaults = (type) => {
       };
     case "parallelogram":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -340,6 +355,7 @@ const getShapeDefaults = (type) => {
       };
     case "trapezoid":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -355,6 +371,7 @@ const getShapeDefaults = (type) => {
       };
     case "isosceles-trapezoid":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -370,6 +387,7 @@ const getShapeDefaults = (type) => {
       };
     case "right-trapezoid":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -385,6 +403,7 @@ const getShapeDefaults = (type) => {
       };
     case "line":
       return {
+        ...baseDefaults,
         width: 140,
         height: 0,
         stroke: DEFAULT_STYLE.stroke,
@@ -401,6 +420,7 @@ const getShapeDefaults = (type) => {
       };
     case "perp-line":
       return {
+        ...baseDefaults,
         width: 140,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -416,6 +436,7 @@ const getShapeDefaults = (type) => {
       };
     case "perp-marker":
       return {
+        ...baseDefaults,
         width: 28,
         height: 28,
         stroke: DEFAULT_STYLE.stroke,
@@ -431,6 +452,7 @@ const getShapeDefaults = (type) => {
       };
     case "rounded":
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -446,6 +468,7 @@ const getShapeDefaults = (type) => {
       };
     case "text":
       return {
+        ...baseDefaults,
         width: 160,
         height: 40,
         stroke: DEFAULT_STYLE.stroke,
@@ -462,6 +485,7 @@ const getShapeDefaults = (type) => {
     case "rect":
     default:
       return {
+        ...baseDefaults,
         width: 150,
         height: 90,
         stroke: DEFAULT_STYLE.stroke,
@@ -588,6 +612,19 @@ const getShapeRotationCenter = (shape) => {
   };
 };
 
+const getShapeTransformProps = (shape) => {
+  const rotation = shape.rotation ?? 0;
+  const flipX = shape.flipX ? -1 : 1;
+  const flipY = shape.flipY ? -1 : 1;
+  if (!rotation && flipX === 1 && flipY === 1) {
+    return {};
+  }
+  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
+  return {
+    transform: `translate(${centerX} ${centerY}) scale(${flipX} ${flipY}) rotate(${rotation}) translate(${-centerX} ${-centerY})`,
+  };
+};
+
 const getLineEndpoints = (shape) => {
   const angle = (normalizeRotation(shape.rotation) * Math.PI) / 180;
   const anchor = getLineRotationAnchorPoint(shape);
@@ -606,11 +643,7 @@ const getLineEndpoints = (shape) => {
 };
 
 const renderShapePrimitive = (shape, props = {}) => {
-  const rotation = shape.rotation ?? 0;
-  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
-  const groupProps = rotation
-    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
-    : {};
+  const groupProps = getShapeTransformProps(shape);
   const sharedProps = {
     stroke: shape.stroke,
     fill: shape.fill,
@@ -802,11 +835,7 @@ const renderCompoundShape = (
   onSelect,
   onPointerDown
 ) => {
-  const rotation = shape.rotation ?? 0;
-  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
-  const groupProps = rotation
-    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
-    : {};
+  const groupProps = getShapeTransformProps(shape);
   const commonProps = {
     stroke: shape.stroke,
     fill: shape.fill,
@@ -865,11 +894,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
   if (shape.type === "compound") {
     return renderCompoundShape(shape, isSelected, isDragging, onSelect, onPointerDown);
   }
-  const rotation = shape.rotation ?? 0;
-  const { x: centerX, y: centerY } = getShapeRotationCenter(shape);
-  const groupProps = rotation
-    ? { transform: `rotate(${rotation} ${centerX} ${centerY})` }
-    : {};
+  const groupProps = getShapeTransformProps(shape);
   const commonProps = {
     stroke: shape.stroke,
     fill: shape.fill,
@@ -1431,6 +1456,14 @@ const getTriangleBounds = (points) => {
   };
 };
 
+const SNAP_DISTANCE = 12;
+const LINE_VERTEX_SNAP_DISTANCE = 18;
+const PERP_MARKER_VERTICAL_THRESHOLD = 4;
+const PERP_MARKER_Y_PADDING = 8;
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGHT = 700;
+const SNAP_AXES = ["x", "y"];
+
 const getTriangleAnglesFromPoints = (points) => {
   if (points.length !== 3) {
     return [60, 60, 60];
@@ -1661,14 +1694,25 @@ const scaleShape = (shape, scaleX, scaleY, originX, originY) => {
   };
 };
 
-const createVertexLabels = (shape) =>
-  getShapeVertices(shape).map((vertex, index) => ({
-    id: `${shape.id}-label-${index}`,
-    text: VERTEX_LETTERS[index] ?? `P${index + 1}`,
-    x: vertex.x + 10,
-    y: vertex.y - 12,
-    fontSize: AUTO_LABEL_FONT_SIZE,
-  }));
+const createVertexLabelShapes = (shape, startIndex) =>
+  getShapeVertices(shape).map((vertex, index) => {
+    const width = 28;
+    const height = 20;
+    const x = clampNumber(vertex.x + 8, 0, CANVAS_WIDTH - width);
+    const y = clampNumber(vertex.y - 18, 0, CANVAS_HEIGHT - height);
+    return {
+      id: `shape-${startIndex + index}`,
+      type: "text",
+      ...getShapeDefaults("text"),
+      x,
+      y,
+      width,
+      height,
+      label: VERTEX_LETTERS[index] ?? `P${index + 1}`,
+      fontSize: AUTO_LABEL_FONT_SIZE,
+      stroke: shape.stroke ?? DEFAULT_STYLE.stroke,
+    };
+  });
 
 const DiagramCanvas = ({
   shapes,
@@ -1686,7 +1730,6 @@ const DiagramCanvas = ({
   onResizePointerDown,
   onRotatePointerDown,
   onVertexPointerDown,
-  onLabelPointerDown,
   onPointerMove,
   onPointerUp,
 }) => {
@@ -1871,33 +1914,6 @@ const DiagramCanvas = ({
     {selectedShapes?.length > 1 ? (
       <g className="selection-layer">{multiSelectionOutlines}</g>
     ) : null}
-    {shapes.flatMap((shape) =>
-      (shape.vertexLabels ?? []).map((label) => (
-        <g
-          key={label.id}
-          className="vertex-label"
-          onPointerDown={(event) => onLabelPointerDown(event, shape, label.id)}
-        >
-          <rect
-            className={`vertex-label-box${
-              /[A-Za-z]/.test(label.text) ? " vertex-label-box--transparent" : ""
-            }`}
-            x={label.x - 12}
-            y={label.y - 12}
-            width="24"
-            height="20"
-            rx="6"
-          />
-          <text
-            x={label.x}
-            y={label.y - 2}
-            style={{ fontSize: label.fontSize ?? AUTO_LABEL_FONT_SIZE }}
-          >
-            {label.text}
-          </text>
-        </g>
-      ))
-    )}
     {selectedShape ? (
       <g className="selection-layer">
         <rect
@@ -1954,14 +1970,6 @@ const DiagramCanvas = ({
   </svg>
   );
 };
-
-const SNAP_DISTANCE = 12;
-const LINE_VERTEX_SNAP_DISTANCE = 18;
-const PERP_MARKER_VERTICAL_THRESHOLD = 4;
-const PERP_MARKER_Y_PADDING = 8;
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 700;
-const SNAP_AXES = ["x", "y"];
 
 const getShapeAnchors = (shape) => {
   const left = shape.x;
@@ -2222,6 +2230,8 @@ export default function App() {
   const [history, setHistory] = useState({ past: [], future: [] });
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
+  const lastPointerPosition = useRef(null);
+  const lastPlacedPosition = useRef(null);
   const suppressCanvasClick = useRef(false);
   const activeDiagram = useMemo(
     () => diagrams.find((diagram) => diagram.id === activeDiagramId),
@@ -2419,8 +2429,18 @@ export default function App() {
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
     const defaults = getShapeDefaults(type);
-    const baseX = 120 + (nextIndex % 5) * 160;
-    const baseY = 120 + Math.floor(nextIndex / 5) * 120;
+    const fallbackPosition = lastPlacedPosition.current ?? { x: 180, y: 140 };
+    const anchorPosition = lastPointerPosition.current ?? fallbackPosition;
+    const baseX = clampNumber(
+      anchorPosition.x - defaults.width / 2,
+      0,
+      CANVAS_WIDTH - defaults.width
+    );
+    const baseY = clampNumber(
+      anchorPosition.y - defaults.height / 2,
+      0,
+      CANVAS_HEIGHT - defaults.height
+    );
     let newShape = {
       id: `shape-${nextIndex}`,
       type,
@@ -2434,16 +2454,31 @@ export default function App() {
         { x: baseX, y: baseY, width: defaults.width },
         initialAngles
       );
+      const bounds = getTriangleBounds(points);
+      const clampedX = clampNumber(bounds.x, 0, CANVAS_WIDTH - bounds.width);
+      const clampedY = clampNumber(bounds.y, 0, CANVAS_HEIGHT - bounds.height);
+      const deltaX = clampedX - bounds.x;
+      const deltaY = clampedY - bounds.y;
       newShape = {
         ...newShape,
-        height,
-        points,
+        x: clampedX,
+        y: clampedY,
+        height: bounds.height,
+        width: bounds.width,
+        points: points.map((point) => ({
+          x: point.x + deltaX,
+          y: point.y + deltaY,
+        })),
         angles,
       };
     }
     recordHistory();
     updateActiveShapes((prev) => [...prev, newShape]);
     setSelectedIds([newShape.id]);
+    lastPlacedPosition.current = {
+      x: newShape.x + newShape.width / 2,
+      y: newShape.y + newShape.height / 2,
+    };
   };
 
   const updateShape = (field, value) => {
@@ -2566,56 +2601,12 @@ export default function App() {
       return;
     }
     recordHistory();
-    const labels = createVertexLabels(selectedShape);
-    updateActiveShapes((prev) =>
-      prev.map((shape) =>
-        shape.id === selectedShape.id
-          ? {
-              ...shape,
-              vertexLabels: labels,
-            }
-          : shape
-      )
-    );
-  };
-
-  const updateVertexLabel = (labelId, text) => {
-    if (!selectedShape) {
+    const startIndex = shapes.length + 1;
+    const labelShapes = createVertexLabelShapes(selectedShape, startIndex);
+    if (labelShapes.length === 0) {
       return;
     }
-    recordHistory();
-    updateActiveShapes((prev) =>
-      prev.map((shape) =>
-        shape.id === selectedShape.id
-          ? {
-              ...shape,
-              vertexLabels: (shape.vertexLabels ?? []).map((label) =>
-                label.id === labelId ? { ...label, text } : label
-              ),
-            }
-          : shape
-      )
-    );
-  };
-
-  const updateVertexLabelFontSize = (value) => {
-    if (!selectedShape) {
-      return;
-    }
-    const nextFontSize = clampNumber(value, 8, 24);
-    updateActiveShapes((prev) =>
-      prev.map((shape) =>
-        shape.id === selectedShape.id
-          ? {
-              ...shape,
-              vertexLabels: (shape.vertexLabels ?? []).map((label) => ({
-                ...label,
-                fontSize: nextFontSize,
-              })),
-            }
-          : shape
-      )
-    );
+    updateActiveShapes((prev) => [...prev, ...labelShapes]);
   };
 
   const getPointerPosition = (event) => {
@@ -2631,6 +2622,7 @@ export default function App() {
   };
 
   const handlePointerDown = (event, shape) => {
+    lastPointerPosition.current = getPointerPosition(event);
     if (isMultiSelectModifier(event)) {
       setSelectedIds((prev) =>
         prev.includes(shape.id) ? prev.filter((item) => item !== shape.id) : [...prev, shape.id]
@@ -2731,28 +2723,6 @@ export default function App() {
       id: shape.id,
       mode: "vertex",
       vertexIndex,
-      startPointerX: x,
-      startPointerY: y,
-      historySnapshot: createHistorySnapshot(),
-      hasMoved: false,
-    };
-    setSelectedIds([shape.id]);
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
-
-  const handleLabelPointerDown = (event, shape, labelId) => {
-    const { x, y } = getPointerPosition(event);
-    const label = (shape.vertexLabels ?? []).find((item) => item.id === labelId);
-    if (!label) {
-      return;
-    }
-    dragState.current = {
-      id: shape.id,
-      mode: "label",
-      labelId,
-      offsetX: x - label.x,
-      offsetY: y - label.y,
       startPointerX: x,
       startPointerY: y,
       historySnapshot: createHistorySnapshot(),
@@ -2910,20 +2880,6 @@ export default function App() {
             angles: getTriangleAnglesFromPoints(nextPoints),
           };
         }
-        if (drag.mode === "label") {
-          return {
-            ...shape,
-            vertexLabels: (shape.vertexLabels ?? []).map((label) =>
-              label.id === drag.labelId
-                ? {
-                    ...label,
-                    x: clampNumber(x - drag.offsetX, 0, CANVAS_WIDTH),
-                    y: clampNumber(y - drag.offsetY, 0, CANVAS_HEIGHT),
-                  }
-                : label
-            ),
-          };
-        }
         if (drag.mode === "resize") {
           const dx = x - drag.originX;
           const dy = y - drag.originY;
@@ -3009,6 +2965,11 @@ export default function App() {
     });
   };
 
+  const handleCanvasPointerMove = (event) => {
+    lastPointerPosition.current = getPointerPosition(event);
+    handlePointerMove(event);
+  };
+
   const handlePointerUp = () => {
     if (dragState.current?.mode === "selection" && dragState.current?.hasMoved) {
       suppressCanvasClick.current = true;
@@ -3043,8 +3004,6 @@ export default function App() {
     selectedShape?.type === "triangle"
       ? selectedShape.angles ?? getTriangleAnglesFromPoints(selectedShape.points ?? [])
       : null;
-  const vertexLabelFontSize =
-    selectedShape?.vertexLabels?.[0]?.fontSize ?? AUTO_LABEL_FONT_SIZE;
 
   const handleSelectShape = (id, event) => {
     if (!id) {
@@ -3062,6 +3021,7 @@ export default function App() {
 
   const handleCanvasPointerDown = (event) => {
     const { x, y } = getPointerPosition(event);
+    lastPointerPosition.current = { x, y };
     dragState.current = {
       mode: "selection",
       startPointerX: x,
@@ -3092,6 +3052,49 @@ export default function App() {
       prev.filter((shape) => !selectedIds.includes(shape.id))
     );
     setSelectedIds([]);
+  };
+
+  const handleFlipSelected = (axis) => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+    recordHistory();
+    updateActiveShapes((prev) =>
+      prev.map((shape) => {
+        if (!selectedIds.includes(shape.id)) {
+          return shape;
+        }
+        if (shape.type === "triangle" && shape.points) {
+          const bounds = getTriangleBounds(shape.points);
+          const centerX = bounds.x + bounds.width / 2;
+          const centerY = bounds.y + bounds.height / 2;
+          const flippedPoints = shape.points.map((point) => ({
+            x:
+              axis === "horizontal"
+                ? centerX - (point.x - centerX)
+                : point.x,
+            y:
+              axis === "vertical"
+                ? centerY - (point.y - centerY)
+                : point.y,
+          }));
+          const nextBounds = getTriangleBounds(flippedPoints);
+          return {
+            ...shape,
+            ...nextBounds,
+            points: flippedPoints,
+            angles: getTriangleAnglesFromPoints(flippedPoints),
+          };
+        }
+        if (axis === "horizontal") {
+          return { ...shape, flipX: !shape.flipX };
+        }
+        if (axis === "vertical") {
+          return { ...shape, flipY: !shape.flipY };
+        }
+        return shape;
+      })
+    );
   };
 
   const canBooleanOps =
@@ -3399,8 +3402,7 @@ export default function App() {
             onResizePointerDown={handleResizePointerDown}
             onRotatePointerDown={handleRotatePointerDown}
             onVertexPointerDown={handleVertexPointerDown}
-            onLabelPointerDown={handleLabelPointerDown}
-            onPointerMove={handlePointerMove}
+            onPointerMove={handleCanvasPointerMove}
             onPointerUp={handlePointerUp}
           />
         </main>
@@ -3433,6 +3435,17 @@ export default function App() {
                     Select two area shapes (rectangles or polygons) to merge or clip.
                   </p>
                 ) : null}
+              </div>
+              <div className="property-row action-row">
+                <span className="property-label">Flip selected</span>
+                <div className="action-buttons">
+                  <button type="button" onClick={() => handleFlipSelected("horizontal")}>
+                    Flip horizontal
+                  </button>
+                  <button type="button" onClick={() => handleFlipSelected("vertical")}>
+                    Flip vertical
+                  </button>
+                </div>
               </div>
               <div className="property-row">
                 <button type="button" className="danger" onClick={handleDeleteSelected}>
@@ -3637,6 +3650,17 @@ export default function App() {
                   }
                 />
               </div>
+              <div className="property-row action-row">
+                <span className="property-label">Flip</span>
+                <div className="action-buttons">
+                  <button type="button" onClick={() => handleFlipSelected("horizontal")}>
+                    Flip horizontal
+                  </button>
+                  <button type="button" onClick={() => handleFlipSelected("vertical")}>
+                    Flip vertical
+                  </button>
+                </div>
+              </div>
               {supportsLineAnchor ? (
                 <div className="property-row">
                   <label htmlFor="shape-rotation-anchor">Rotation pivot</label>
@@ -3710,43 +3734,10 @@ export default function App() {
                       Auto label
                     </button>
                   </div>
-                  {(selectedShape.vertexLabels ?? []).length > 0 ? (
-                    <>
-                      <div className="property-row split">
-                        <div>
-                          <label htmlFor="vertex-label-font-size">Label font size</label>
-                          <input
-                            id="vertex-label-font-size"
-                            type="number"
-                            min="8"
-                            max="24"
-                            value={vertexLabelFontSize}
-                            onChange={(event) =>
-                              updateVertexLabelFontSize(event.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="vertex-label-inputs">
-                        {(selectedShape.vertexLabels ?? []).map((label, index) => (
-                          <div key={label.id}>
-                            <label htmlFor={`vertex-label-${label.id}`}>
-                              {`Label ${index + 1}`}
-                            </label>
-                            <input
-                              id={`vertex-label-${label.id}`}
-                              value={label.text}
-                              onChange={(event) =>
-                                updateVertexLabel(label.id, event.target.value)
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <p className="helper-text">Create draggable labels for each vertex.</p>
-                  )}
+                  <p className="helper-text">
+                    Auto label adds separate text boxes near each vertex that can be moved or deleted
+                    individually.
+                  </p>
                 </div>
               ) : null}
               <div className="property-row">
