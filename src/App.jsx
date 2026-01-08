@@ -1381,6 +1381,8 @@ const clampNumber = (value, min, max) => {
 const TRIANGLE_MIN_ANGLE = 10;
 const TRIANGLE_MAX_ANGLE = 170;
 const TRIANGLE_ANGLE_SUM = 180;
+const TRIANGLE_MIN_SIDE = 20;
+const TRIANGLE_MAX_SIDE = 400;
 const VERTEX_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 const clampAngle = (value) =>
@@ -1483,6 +1485,99 @@ const getTriangleAnglesFromPoints = (points) => {
   const angleC = TRIANGLE_ANGLE_SUM - angleA - angleB;
   return [angleA, angleB, angleC];
 };
+
+const getTriangleSideLengthsFromPoints = (points) => {
+  if (points.length !== 3) {
+    return null;
+  }
+  const distance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const [pointA, pointB, pointC] = points;
+  return {
+    sideA: distance(pointB, pointC),
+    sideB: distance(pointA, pointC),
+    sideC: distance(pointA, pointB),
+  };
+};
+
+const isValidTriangleSides = (sideA, sideB, sideC) =>
+  sideA + sideB > sideC && sideA + sideC > sideB && sideB + sideC > sideA;
+
+const buildTriangleFromSides = (sideA, sideB, sideC) => {
+  if (!isValidTriangleSides(sideA, sideB, sideC)) {
+    return null;
+  }
+  const cosAngleA =
+    (sideB ** 2 + sideC ** 2 - sideA ** 2) / (2 * sideB * sideC);
+  const angleA = Math.acos(clampNumber(cosAngleA, -1, 1));
+  const points = [
+    { x: 0, y: 0 },
+    { x: sideC, y: 0 },
+    { x: sideB * Math.cos(angleA), y: sideB * Math.sin(angleA) },
+  ];
+  return {
+    points,
+    angles: getTriangleAnglesFromPoints(points),
+  };
+};
+
+const buildTriangleFromSas = (sideA, sideB, angleC) => {
+  const angleRadians = (angleC * Math.PI) / 180;
+  const sideC = Math.sqrt(
+    Math.max(sideA ** 2 + sideB ** 2 - 2 * sideA * sideB * Math.cos(angleRadians), 0)
+  );
+  return buildTriangleFromSides(sideA, sideB, sideC);
+};
+
+const buildTriangleFromAsa = (angleA, angleB, sideC) => {
+  const angleC = TRIANGLE_ANGLE_SUM - angleA - angleB;
+  if (angleC <= 0) {
+    return null;
+  }
+  const radiansA = (angleA * Math.PI) / 180;
+  const radiansB = (angleB * Math.PI) / 180;
+  const radiansC = (angleC * Math.PI) / 180;
+  const sinC = Math.sin(radiansC);
+  if (!sinC) {
+    return null;
+  }
+  const sideA = (Math.sin(radiansA) / sinC) * sideC;
+  const sideB = (Math.sin(radiansB) / sinC) * sideC;
+  return buildTriangleFromSides(sideA, sideB, sideC);
+};
+
+const buildTriangleFromAaa = (angleA, angleB, angleC, baseSide) => {
+  const sum = angleA + angleB + angleC;
+  if (Math.abs(sum - TRIANGLE_ANGLE_SUM) > 1) {
+    return null;
+  }
+  return buildTriangleFromAsa(angleA, angleB, baseSide);
+};
+
+const placeTrianglePoints = (points, targetX, targetY) => {
+  const bounds = getTriangleBounds(points);
+  const offsetX = targetX - bounds.x;
+  const offsetY = targetY - bounds.y;
+  const shiftedPoints = points.map((point) => ({
+    x: point.x + offsetX,
+    y: point.y + offsetY,
+  }));
+  const shiftedBounds = getTriangleBounds(shiftedPoints);
+  const clampedX = clampNumber(shiftedBounds.x, 0, CANVAS_WIDTH - shiftedBounds.width);
+  const clampedY = clampNumber(shiftedBounds.y, 0, CANVAS_HEIGHT - shiftedBounds.height);
+  const deltaX = clampedX - shiftedBounds.x;
+  const deltaY = clampedY - shiftedBounds.y;
+  const clampedPoints = shiftedPoints.map((point) => ({
+    x: point.x + deltaX,
+    y: point.y + deltaY,
+  }));
+  return {
+    points: clampedPoints,
+    bounds: getTriangleBounds(clampedPoints),
+  };
+};
+
+const formatTriangleValue = (value) =>
+  Number.isFinite(value) ? Math.round(value * 10) / 10 : "";
 
 const getShapeVertices = (shape) => {
   switch (shape.type) {
@@ -2229,6 +2324,16 @@ export default function App() {
   const [showGrid, setShowGrid] = useState(true);
   const [selectionBox, setSelectionBox] = useState(null);
   const [triangleAngleDrafts, setTriangleAngleDrafts] = useState({});
+  const [triangleInputMode, setTriangleInputMode] = useState("sss");
+  const [triangleInputValues, setTriangleInputValues] = useState({
+    sideA: "",
+    sideB: "",
+    sideC: "",
+    angleA: "",
+    angleB: "",
+    angleC: "",
+  });
+  const [triangleInputError, setTriangleInputError] = useState("");
   const [history, setHistory] = useState({ past: [], future: [] });
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
@@ -2249,6 +2354,29 @@ export default function App() {
     () => selectedIds.map((id) => shapes.find((shape) => shape.id === id)).filter(Boolean),
     [selectedIds, shapes]
   );
+
+  useEffect(() => {
+    if (!selectedShape || selectedShape.type !== "triangle") {
+      setTriangleInputError("");
+      return;
+    }
+    const points = selectedShape.points ?? [];
+    const sides = getTriangleSideLengthsFromPoints(points);
+    const angles =
+      selectedShape.angles ?? getTriangleAnglesFromPoints(selectedShape.points ?? []);
+    if (!sides) {
+      return;
+    }
+    setTriangleInputValues({
+      sideA: formatTriangleValue(sides.sideA),
+      sideB: formatTriangleValue(sides.sideB),
+      sideC: formatTriangleValue(sides.sideC),
+      angleA: formatTriangleValue(angles[0]),
+      angleB: formatTriangleValue(angles[1]),
+      angleC: formatTriangleValue(angles[2]),
+    });
+    setTriangleInputError("");
+  }, [selectedShape?.id]);
 
   const createHistorySnapshot = useCallback(
     () => ({
@@ -2596,6 +2724,133 @@ export default function App() {
           : shape
       )
     );
+  };
+
+  const handleTriangleInputChange = (field) => (event) => {
+    const nextValue = event.target.value;
+    setTriangleInputValues((prev) => ({
+      ...prev,
+      [field]: nextValue,
+    }));
+    setTriangleInputError("");
+  };
+
+  const handleApplyTriangleInputs = () => {
+    if (!selectedShape || selectedShape.type !== "triangle") {
+      return;
+    }
+    const parseSide = (value) => {
+      if (value === "" || value == null) {
+        return null;
+      }
+      const numericValue = Number(value);
+      if (Number.isNaN(numericValue)) {
+        return null;
+      }
+      return clampNumber(numericValue, TRIANGLE_MIN_SIDE, TRIANGLE_MAX_SIDE);
+    };
+    const parseAngle = (value) => {
+      if (value === "" || value == null) {
+        return null;
+      }
+      const numericValue = Number(value);
+      if (Number.isNaN(numericValue)) {
+        return null;
+      }
+      return clampAngle(numericValue);
+    };
+    const sideA = parseSide(triangleInputValues.sideA);
+    const sideB = parseSide(triangleInputValues.sideB);
+    const sideC = parseSide(triangleInputValues.sideC);
+    const angleA = parseAngle(triangleInputValues.angleA);
+    const angleB = parseAngle(triangleInputValues.angleB);
+    const angleC = parseAngle(triangleInputValues.angleC);
+    let result = null;
+
+    switch (triangleInputMode) {
+      case "sss":
+        if (sideA == null || sideB == null || sideC == null) {
+          setTriangleInputError("请填写三条边长。");
+          return;
+        }
+        result = buildTriangleFromSides(sideA, sideB, sideC);
+        if (!result) {
+          setTriangleInputError("边长无法构成三角形。");
+          return;
+        }
+        break;
+      case "sas":
+        if (sideA == null || sideB == null || angleC == null) {
+          setTriangleInputError("请填写两条边和夹角C。");
+          return;
+        }
+        result = buildTriangleFromSas(sideA, sideB, angleC);
+        if (!result) {
+          setTriangleInputError("夹角或边长无效，无法构成三角形。");
+          return;
+        }
+        break;
+      case "asa":
+        if (angleA == null || angleB == null || sideC == null) {
+          setTriangleInputError("请填写两个角和夹边c。");
+          return;
+        }
+        if (angleA + angleB >= TRIANGLE_ANGLE_SUM) {
+          setTriangleInputError("两个角之和需要小于180°。");
+          return;
+        }
+        result = buildTriangleFromAsa(angleA, angleB, sideC);
+        if (!result) {
+          setTriangleInputError("角度或边长无效，无法构成三角形。");
+          return;
+        }
+        break;
+      case "aaa": {
+        if (angleA == null || angleB == null || angleC == null) {
+          setTriangleInputError("请填写三个角度。");
+          return;
+        }
+        const baseSide =
+          sideC ?? clampNumber(selectedShape.width ?? 140, TRIANGLE_MIN_SIDE, TRIANGLE_MAX_SIDE);
+        result = buildTriangleFromAaa(angleA, angleB, angleC, baseSide);
+        if (!result) {
+          setTriangleInputError("三个角之和需要为180°。");
+          return;
+        }
+        break;
+      }
+      default:
+        return;
+    }
+
+    const placed = placeTrianglePoints(result.points, selectedShape.x, selectedShape.y);
+    recordHistory();
+    updateActiveShapes((prev) =>
+      prev.map((shape) =>
+        shape.id === selectedShape.id
+          ? {
+              ...shape,
+              ...placed.bounds,
+              points: placed.points,
+              angles: getTriangleAnglesFromPoints(placed.points),
+            }
+          : shape
+      )
+    );
+    const nextSides = getTriangleSideLengthsFromPoints(placed.points);
+    const nextAngles = getTriangleAnglesFromPoints(placed.points);
+    if (nextSides) {
+      setTriangleInputValues({
+        sideA: formatTriangleValue(nextSides.sideA),
+        sideB: formatTriangleValue(nextSides.sideB),
+        sideC: formatTriangleValue(nextSides.sideC),
+        angleA: formatTriangleValue(nextAngles[0]),
+        angleB: formatTriangleValue(nextAngles[1]),
+        angleC: formatTriangleValue(nextAngles[2]),
+      });
+    }
+    setTriangleAngleDrafts({});
+    setTriangleInputError("");
   };
 
   const handleAutoVertexLabels = (direction) => {
@@ -3777,6 +4032,194 @@ export default function App() {
                       );
                     })}
                   </div>
+                </div>
+              ) : null}
+              {selectedShape.type === "triangle" ? (
+                <div className="property-row">
+                  <span className="property-label">🔺 Triangle builder</span>
+                  <select
+                    value={triangleInputMode}
+                    onChange={(event) => {
+                      setTriangleInputMode(event.target.value);
+                      setTriangleInputError("");
+                    }}
+                  >
+                    <option value="sss">SSS (三边)</option>
+                    <option value="sas">SAS (两边 + 夹角C)</option>
+                    <option value="asa">ASA (两角 + 夹边c)</option>
+                    <option value="aaa">AAA (三角)</option>
+                  </select>
+                  <p className="helper-text">
+                    A为左下角，B为右下角，C为顶角；a=BC，b=AC，c=AB。
+                  </p>
+                  {triangleInputMode === "sss" ? (
+                    <div className="triangle-input-grid">
+                      <div>
+                        <label htmlFor="triangle-side-a">Side a</label>
+                        <input
+                          id="triangle-side-a"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideA}
+                          onChange={handleTriangleInputChange("sideA")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-side-b">Side b</label>
+                        <input
+                          id="triangle-side-b"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideB}
+                          onChange={handleTriangleInputChange("sideB")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-side-c">Side c</label>
+                        <input
+                          id="triangle-side-c"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideC}
+                          onChange={handleTriangleInputChange("sideC")}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  {triangleInputMode === "sas" ? (
+                    <div className="triangle-input-grid">
+                      <div>
+                        <label htmlFor="triangle-sas-side-a">Side a</label>
+                        <input
+                          id="triangle-sas-side-a"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideA}
+                          onChange={handleTriangleInputChange("sideA")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-sas-side-b">Side b</label>
+                        <input
+                          id="triangle-sas-side-b"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideB}
+                          onChange={handleTriangleInputChange("sideB")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-sas-angle-c">Angle C</label>
+                        <input
+                          id="triangle-sas-angle-c"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleC}
+                          onChange={handleTriangleInputChange("angleC")}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  {triangleInputMode === "asa" ? (
+                    <div className="triangle-input-grid">
+                      <div>
+                        <label htmlFor="triangle-asa-angle-a">Angle A</label>
+                        <input
+                          id="triangle-asa-angle-a"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleA}
+                          onChange={handleTriangleInputChange("angleA")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-asa-angle-b">Angle B</label>
+                        <input
+                          id="triangle-asa-angle-b"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleB}
+                          onChange={handleTriangleInputChange("angleB")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-asa-side-c">Side c</label>
+                        <input
+                          id="triangle-asa-side-c"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideC}
+                          onChange={handleTriangleInputChange("sideC")}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  {triangleInputMode === "aaa" ? (
+                    <div className="triangle-input-grid columns-3">
+                      <div>
+                        <label htmlFor="triangle-aaa-angle-a">Angle A</label>
+                        <input
+                          id="triangle-aaa-angle-a"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleA}
+                          onChange={handleTriangleInputChange("angleA")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-aaa-angle-b">Angle B</label>
+                        <input
+                          id="triangle-aaa-angle-b"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleB}
+                          onChange={handleTriangleInputChange("angleB")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-aaa-angle-c">Angle C</label>
+                        <input
+                          id="triangle-aaa-angle-c"
+                          type="number"
+                          min={TRIANGLE_MIN_ANGLE}
+                          max={TRIANGLE_MAX_ANGLE}
+                          value={triangleInputValues.angleC}
+                          onChange={handleTriangleInputChange("angleC")}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="triangle-aaa-side-c">Base side c</label>
+                        <input
+                          id="triangle-aaa-side-c"
+                          type="number"
+                          min={TRIANGLE_MIN_SIDE}
+                          max={TRIANGLE_MAX_SIDE}
+                          value={triangleInputValues.sideC}
+                          onChange={handleTriangleInputChange("sideC")}
+                          placeholder={`${Math.round(selectedShape.width ?? 140)}`}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="action-buttons">
+                    <button type="button" onClick={handleApplyTriangleInputs}>
+                      Apply triangle
+                    </button>
+                  </div>
+                  {triangleInputError ? (
+                    <p className="helper-text error">{triangleInputError}</p>
+                  ) : null}
                 </div>
               ) : null}
               {hasVertices ? (

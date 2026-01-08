@@ -488,6 +488,20 @@ svg text {
   gap: 10px;
 }
 
+.triangle-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.triangle-input-grid.columns-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.helper-text.error {
+  color: #dc2626;
+}
+
 .vertex-label-row {
   display: flex;
   justify-content: space-between;
