@@ -2225,7 +2225,7 @@ const cloneDiagrams = (diagrams) =>
     shapes: cloneShapes(diagram.shapes ?? []),
   }));
 
-const STORAGE_KEY = "idex-diagrams-v1";
+const DIAGRAMS_ENDPOINT = "/api/diagrams";
 
 const createDefaultDiagrams = () => [
   {
@@ -2262,56 +2262,20 @@ const getInitialDiagramState = () => {
     activeDiagramId: "diagram-1",
   };
 
-  if (typeof window === "undefined") {
-    return {
-      ...fallback,
-      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
-    };
-  }
-
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return {
-      ...fallback,
-      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
-    };
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    const storedDiagrams = Array.isArray(parsed?.diagrams) ? parsed.diagrams : null;
-    if (!storedDiagrams || storedDiagrams.length === 0) {
-      return {
-        ...fallback,
-        diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
-      };
-    }
-    const normalized = storedDiagrams
-      .filter((diagram) => diagram && typeof diagram.id === "string")
-      .map((diagram) => ({
-        ...diagram,
-        shapes: Array.isArray(diagram.shapes) ? diagram.shapes : [],
-        name: diagram.name ?? "Diagram",
-      }));
-    const activeId =
-      typeof parsed?.activeDiagramId === "string"
-        ? parsed.activeDiagramId
-        : normalized[0]?.id;
-    const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
-      ? activeId
-      : normalized[0]?.id;
-    return {
-      diagrams: normalized,
-      activeDiagramId: safeActiveId ?? null,
-      diagramCounter: getDiagramCounterFromIds(normalized),
-    };
-  } catch (error) {
-    return {
-      ...fallback,
-      diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
-    };
-  }
+  return {
+    ...fallback,
+    diagramCounter: getDiagramCounterFromIds(fallback.diagrams),
+  };
 };
+
+const normalizeStoredDiagrams = (storedDiagrams) =>
+  storedDiagrams
+    .filter((diagram) => diagram && typeof diagram.id === "string")
+    .map((diagram) => ({
+      ...diagram,
+      shapes: Array.isArray(diagram.shapes) ? diagram.shapes : [],
+      name: diagram.name ?? "Diagram",
+    }));
 
 export default function App() {
   const initialDiagramState = useMemo(() => getInitialDiagramState(), []);
@@ -2401,14 +2365,71 @@ export default function App() {
   }, [createHistorySnapshot, pushHistorySnapshot]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let isMounted = true;
+    const loadFromServer = async () => {
+      try {
+        const response = await fetch(DIAGRAMS_ENDPOINT, {
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        if (!response.ok) {
+          return;
+        }
+        const parsed = await response.json();
+        const storedDiagrams = Array.isArray(parsed?.diagrams) ? parsed.diagrams : null;
+        if (!storedDiagrams || storedDiagrams.length === 0) {
+          return;
+        }
+        const normalized = normalizeStoredDiagrams(storedDiagrams);
+        const activeId =
+          typeof parsed?.activeDiagramId === "string"
+            ? parsed.activeDiagramId
+            : normalized[0]?.id;
+        const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
+          ? activeId
+          : normalized[0]?.id;
+        if (isMounted) {
+          setDiagrams(normalized);
+          setActiveDiagramId(safeActiveId ?? null);
+          diagramCounter.current = getDiagramCounterFromIds(normalized);
+          setSelectedIds([]);
+          setSnapGuides([]);
+          setSelectionBox(null);
+          setHistory({ past: [], future: [] });
+        }
+      } catch (error) {
+        // Ignore load failures and keep defaults.
+      }
+    };
+    loadFromServer();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
     const payload = {
       diagrams,
       activeDiagramId,
     };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const saveToServer = async () => {
+      try {
+        await fetch(DIAGRAMS_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+      } catch (error) {
+        // Ignore save failures; data remains local in memory.
+      }
+    };
+    saveToServer();
+    return () => controller.abort();
   }, [activeDiagramId, diagrams]);
 
   useEffect(() => {
