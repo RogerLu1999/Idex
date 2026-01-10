@@ -2227,6 +2227,8 @@ const cloneDiagrams = (diagrams) =>
 
 const DIAGRAMS_ENDPOINT = "/api/diagrams";
 const LOCAL_STORAGE_KEY = "diagram-studio-state";
+const DEFAULT_USE_SERVER_STORAGE =
+  import.meta?.env?.VITE_USE_SERVER_STORAGE === "true";
 
 const createDefaultDiagrams = () => [
   {
@@ -2327,7 +2329,9 @@ export default function App() {
   });
   const [triangleInputError, setTriangleInputError] = useState("");
   const [history, setHistory] = useState({ past: [], future: [] });
-  const [useServerStorage, setUseServerStorage] = useState(true);
+  const [useServerStorage, setUseServerStorage] = useState(
+    DEFAULT_USE_SERVER_STORAGE
+  );
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
   const lastPointerPosition = useRef(null);
@@ -2395,6 +2399,33 @@ export default function App() {
 
   useEffect(() => {
     let isMounted = true;
+    const applyStoredDiagrams = (storedDiagrams, storedActiveId) => {
+      const normalized = normalizeStoredDiagrams(storedDiagrams);
+      const activeId =
+        typeof storedActiveId === "string" ? storedActiveId : normalized[0]?.id;
+      const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
+        ? activeId
+        : normalized[0]?.id;
+      if (isMounted) {
+        setDiagrams(normalized);
+        setActiveDiagramId(safeActiveId ?? null);
+        diagramCounter.current = getDiagramCounterFromIds(normalized);
+        setSelectedIds([]);
+        setSnapGuides([]);
+        setSelectionBox(null);
+        setHistory({ past: [], future: [] });
+      }
+    };
+    const loadFromLocal = () => {
+      const fallback = readFromLocalStorage();
+      const storedDiagrams = Array.isArray(fallback?.diagrams)
+        ? fallback.diagrams
+        : null;
+      if (!storedDiagrams || storedDiagrams.length === 0) {
+        return;
+      }
+      applyStoredDiagrams(storedDiagrams, fallback?.activeDiagramId);
+    };
     const loadFromServer = async () => {
       try {
         const response = await fetch(DIAGRAMS_ENDPOINT, {
@@ -2410,59 +2441,24 @@ export default function App() {
         if (!storedDiagrams || storedDiagrams.length === 0) {
           throw new Error("Diagram load empty.");
         }
-        const normalized = normalizeStoredDiagrams(storedDiagrams);
-        const activeId =
-          typeof parsed?.activeDiagramId === "string"
-            ? parsed.activeDiagramId
-            : normalized[0]?.id;
-        const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
-          ? activeId
-          : normalized[0]?.id;
-        if (isMounted) {
-          setDiagrams(normalized);
-          setActiveDiagramId(safeActiveId ?? null);
-          diagramCounter.current = getDiagramCounterFromIds(normalized);
-          setSelectedIds([]);
-          setSnapGuides([]);
-          setSelectionBox(null);
-          setHistory({ past: [], future: [] });
-        }
+        applyStoredDiagrams(storedDiagrams, parsed?.activeDiagramId);
       } catch (error) {
-        const fallback = readFromLocalStorage();
-        const storedDiagrams = Array.isArray(fallback?.diagrams)
-          ? fallback.diagrams
-          : null;
-        if (!storedDiagrams || storedDiagrams.length === 0) {
-          if (isMounted) {
-            setUseServerStorage(false);
-          }
-          return;
-        }
-        const normalized = normalizeStoredDiagrams(storedDiagrams);
-        const activeId =
-          typeof fallback?.activeDiagramId === "string"
-            ? fallback.activeDiagramId
-            : normalized[0]?.id;
-        const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
-          ? activeId
-          : normalized[0]?.id;
         if (isMounted) {
           setUseServerStorage(false);
-          setDiagrams(normalized);
-          setActiveDiagramId(safeActiveId ?? null);
-          diagramCounter.current = getDiagramCounterFromIds(normalized);
-          setSelectedIds([]);
-          setSnapGuides([]);
-          setSelectionBox(null);
-          setHistory({ past: [], future: [] });
         }
+        loadFromLocal();
       }
     };
-    loadFromServer();
+
+    if (useServerStorage) {
+      loadFromServer();
+    } else {
+      loadFromLocal();
+    }
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [useServerStorage]);
 
   useEffect(() => {
     const controller = new AbortController();
