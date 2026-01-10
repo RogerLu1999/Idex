@@ -2226,6 +2226,7 @@ const cloneDiagrams = (diagrams) =>
   }));
 
 const DIAGRAMS_ENDPOINT = "/api/diagrams";
+const LOCAL_STORAGE_KEY = "diagram-studio-state";
 
 const createDefaultDiagrams = () => [
   {
@@ -2277,6 +2278,33 @@ const normalizeStoredDiagrams = (storedDiagrams) =>
       name: diagram.name ?? "Diagram",
     }));
 
+const readFromLocalStorage = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const writeToLocalStorage = (payload) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    // Ignore local storage failures.
+  }
+};
+
 export default function App() {
   const initialDiagramState = useMemo(() => getInitialDiagramState(), []);
   const [diagrams, setDiagrams] = useState(initialDiagramState.diagrams);
@@ -2299,6 +2327,7 @@ export default function App() {
   });
   const [triangleInputError, setTriangleInputError] = useState("");
   const [history, setHistory] = useState({ past: [], future: [] });
+  const [useServerStorage, setUseServerStorage] = useState(true);
   const diagramCounter = useRef(initialDiagramState.diagramCounter);
   const dragState = useRef(null);
   const lastPointerPosition = useRef(null);
@@ -2374,12 +2403,12 @@ export default function App() {
           },
         });
         if (!response.ok) {
-          return;
+          throw new Error("Diagram load failed.");
         }
         const parsed = await response.json();
         const storedDiagrams = Array.isArray(parsed?.diagrams) ? parsed.diagrams : null;
         if (!storedDiagrams || storedDiagrams.length === 0) {
-          return;
+          throw new Error("Diagram load empty.");
         }
         const normalized = normalizeStoredDiagrams(storedDiagrams);
         const activeId =
@@ -2399,7 +2428,34 @@ export default function App() {
           setHistory({ past: [], future: [] });
         }
       } catch (error) {
-        // Ignore load failures and keep defaults.
+        const fallback = readFromLocalStorage();
+        const storedDiagrams = Array.isArray(fallback?.diagrams)
+          ? fallback.diagrams
+          : null;
+        if (!storedDiagrams || storedDiagrams.length === 0) {
+          if (isMounted) {
+            setUseServerStorage(false);
+          }
+          return;
+        }
+        const normalized = normalizeStoredDiagrams(storedDiagrams);
+        const activeId =
+          typeof fallback?.activeDiagramId === "string"
+            ? fallback.activeDiagramId
+            : normalized[0]?.id;
+        const safeActiveId = normalized.some((diagram) => diagram.id === activeId)
+          ? activeId
+          : normalized[0]?.id;
+        if (isMounted) {
+          setUseServerStorage(false);
+          setDiagrams(normalized);
+          setActiveDiagramId(safeActiveId ?? null);
+          diagramCounter.current = getDiagramCounterFromIds(normalized);
+          setSelectedIds([]);
+          setSnapGuides([]);
+          setSelectionBox(null);
+          setHistory({ past: [], future: [] });
+        }
       }
     };
     loadFromServer();
@@ -2415,8 +2471,12 @@ export default function App() {
       activeDiagramId,
     };
     const saveToServer = async () => {
+      if (!useServerStorage) {
+        writeToLocalStorage(payload);
+        return;
+      }
       try {
-        await fetch(DIAGRAMS_ENDPOINT, {
+        const response = await fetch(DIAGRAMS_ENDPOINT, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2424,13 +2484,17 @@ export default function App() {
           body: JSON.stringify(payload),
           signal: controller.signal,
         });
+        if (!response.ok) {
+          throw new Error("Diagram save failed.");
+        }
       } catch (error) {
-        // Ignore save failures; data remains local in memory.
+        setUseServerStorage(false);
+        writeToLocalStorage(payload);
       }
     };
     saveToServer();
     return () => controller.abort();
-  }, [activeDiagramId, diagrams]);
+  }, [activeDiagramId, diagrams, useServerStorage]);
 
   useEffect(() => {
     setTriangleAngleDrafts({});
