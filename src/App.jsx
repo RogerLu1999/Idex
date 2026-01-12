@@ -165,6 +165,7 @@ const DEFAULT_STYLE = {
   fillEffect: "solid",
 };
 const AUTO_LABEL_FONT_SIZE = 11;
+const PASTE_OFFSET = 20;
 
 const CREATE_LINKS = [
   { id: "create-diagram", label: "Create diagram", template: "component" },
@@ -1683,6 +1684,20 @@ const getShapeBounds = (shape) => {
   };
 };
 
+const getShapesBounds = (shapes) =>
+  shapes.reduce(
+    (acc, shape) => {
+      const bounds = getShapeBounds(shape);
+      return {
+        minX: Math.min(acc.minX, bounds.x),
+        minY: Math.min(acc.minY, bounds.y),
+        maxX: Math.max(acc.maxX, bounds.x + bounds.width),
+        maxY: Math.max(acc.maxY, bounds.y + bounds.height),
+      };
+    },
+    { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+  );
+
 const cloneShapeForCompound = (shape) => ({
   ...shape,
   label: "",
@@ -2337,6 +2352,7 @@ export default function App() {
   const lastPointerPosition = useRef(null);
   const lastPlacedPosition = useRef(null);
   const suppressCanvasClick = useRef(false);
+  const clipboardRef = useRef({ shapes: [], offset: PASTE_OFFSET });
   const activeDiagram = useMemo(
     () => diagrams.find((diagram) => diagram.id === activeDiagramId),
     [activeDiagramId, diagrams]
@@ -2598,6 +2614,47 @@ export default function App() {
         }
         return;
       }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c") {
+        if (selectedIds.length === 0) {
+          return;
+        }
+        event.preventDefault();
+        const clipboardShapes = selectedIds
+          .map((id) => shapes.find((shape) => shape.id === id))
+          .filter(Boolean)
+          .map((shape) => cloneShape(shape));
+        clipboardRef.current = { shapes: clipboardShapes, offset: PASTE_OFFSET };
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v") {
+        const clipboardShapes = clipboardRef.current.shapes ?? [];
+        if (clipboardShapes.length === 0) {
+          return;
+        }
+        event.preventDefault();
+        const pastedShapes = clipboardShapes.map((shape) => cloneShape(shape));
+        const bounds = getShapesBounds(pastedShapes);
+        const offset = clipboardRef.current.offset ?? PASTE_OFFSET;
+        const deltaX = clampNumber(offset, -bounds.minX, CANVAS_WIDTH - bounds.maxX);
+        const deltaY = clampNumber(offset, -bounds.minY, CANVAS_HEIGHT - bounds.maxY);
+        const timestamp = Date.now();
+        const nextShapes = pastedShapes.map((shape, index) => ({
+          ...translateShape(shape, deltaX, deltaY),
+          id: `shape-${timestamp}-${index}`,
+        }));
+        recordHistory();
+        updateActiveShapes((prev) => [...prev, ...nextShapes]);
+        setSelectedIds(nextShapes.map((shape) => shape.id));
+        clipboardRef.current = {
+          shapes: clipboardShapes,
+          offset: offset + PASTE_OFFSET,
+        };
+        lastPlacedPosition.current = {
+          x: (bounds.minX + bounds.maxX) / 2 + deltaX,
+          y: (bounds.minY + bounds.maxY) / 2 + deltaY,
+        };
+        return;
+      }
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
         const step = event.shiftKey ? 10 : 1;
         const deltaMap = {
@@ -2635,7 +2692,15 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeDiagramId, handleUndo, moveSelectedShapes, recordHistory, selectedIds, shapes]);
+  }, [
+    activeDiagramId,
+    handleUndo,
+    moveSelectedShapes,
+    recordHistory,
+    selectedIds,
+    shapes,
+    updateActiveShapes,
+  ]);
 
   const handleAddShape = (type) => {
     const nextIndex = shapes.length + 1;
