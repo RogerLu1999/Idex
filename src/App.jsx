@@ -865,7 +865,7 @@ const renderCompoundShape = (
       shape.fillEffect === "shadow" && shape.fill !== "transparent"
         ? "url(#fill-shadow)"
         : undefined,
-    pointerEvents: "none",
+    pointerEvents: "all",
   };
   const groupClassName = ["shape", isSelected ? "selected" : null, isDragging ? "dragging" : null]
     .filter(Boolean)
@@ -877,6 +877,7 @@ const renderCompoundShape = (
       key={shape.id}
       {...groupProps}
       className={groupClassName}
+      pointerEvents="all"
       onClick={(event) => {
         event.stopPropagation();
         onSelect(shape.id, event);
@@ -1338,7 +1339,13 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
       );
     case "image":
       return (
-        <g key={shape.id} {...groupProps} className={commonProps.className}>
+        <g
+          key={shape.id}
+          {...groupProps}
+          className={commonProps.className}
+          onClick={commonProps.onClick}
+          onPointerDown={commonProps.onPointerDown}
+        >
           <image
             x={shape.x}
             y={shape.y}
@@ -1346,8 +1353,6 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             height={shape.height}
             href={shape.src}
             preserveAspectRatio="none"
-            onClick={commonProps.onClick}
-            onPointerDown={commonProps.onPointerDown}
           />
           <rect
             x={shape.x}
@@ -1358,7 +1363,7 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
             stroke={shape.stroke}
             strokeWidth={shape.strokeWidth}
             strokeDasharray={shape.dash === "solid" ? "none" : shape.dash}
-            pointerEvents="none"
+            pointerEvents="all"
           />
         </g>
       );
