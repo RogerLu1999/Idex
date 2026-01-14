@@ -2880,6 +2880,24 @@ export default function App() {
     );
   };
 
+  const handleImageFileChange = (event) => {
+    if (!selectedShape || selectedShape.type !== "image") {
+      return;
+    }
+    const [file] = event.target.files ?? [];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        updateShape("src", reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
   const updateNumericField = (field, value, min, max) => {
     updateShape(field, clampNumber(value, min, max));
   };
@@ -3966,7 +3984,7 @@ export default function App() {
               ) : null}
               {selectedShape.type === "image" ? (
                 <div className="property-row">
-                  <label htmlFor="shape-image-src">Image URL</label>
+                  <label htmlFor="shape-image-src">Image source</label>
                   <input
                     id="shape-image-src"
                     type="url"
@@ -3974,6 +3992,13 @@ export default function App() {
                     value={selectedShape.src ?? ""}
                     onChange={(event) => updateShape("src", event.target.value)}
                   />
+                  <input
+                    id="shape-image-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                  />
+                  <p className="helper-text">Upload a local image to embed it in the overlay.</p>
                 </div>
               ) : null}
               <div className="property-row">
