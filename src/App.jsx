@@ -20,6 +20,7 @@ const TOOL_ITEMS = [
   { id: "line", label: "Line", zhLabel: "直线", icon: "➖" },
   { id: "perp-line", label: "Perpendicular", zhLabel: "垂直线", icon: "⟂" },
   { id: "perp-marker", label: "Perpendicular Marker", zhLabel: "垂直标记", icon: "⊥" },
+  { id: "image", label: "Image", zhLabel: "图片", icon: "🖼️" },
   { id: "text", label: "Text", zhLabel: "文本", icon: "🔤" },
 ];
 
@@ -482,6 +483,23 @@ const getShapeDefaults = (type) => {
         rotation: 0,
         fillEffect: "solid",
         label: "文本",
+      };
+    case "image":
+      return {
+        ...baseDefaults,
+        width: 200,
+        height: 140,
+        stroke: "#64748b",
+        fill: "transparent",
+        strokeWidth: 1,
+        dash: "solid",
+        fillOpacity: 1,
+        fontSize: 12,
+        cornerRadius: 0,
+        rotation: 0,
+        fillEffect: "solid",
+        label: "",
+        src: "https://placehold.co/320x240?text=Image",
       };
     case "rect":
     default:
@@ -1316,6 +1334,32 @@ const renderShape = (shape, isSelected, isDragging, onSelect, onPointerDown) => 
           >
             {shape.label}
           </text>
+        </g>
+      );
+    case "image":
+      return (
+        <g key={shape.id} {...groupProps} className={commonProps.className}>
+          <image
+            x={shape.x}
+            y={shape.y}
+            width={shape.width}
+            height={shape.height}
+            href={shape.src}
+            preserveAspectRatio="none"
+            onClick={commonProps.onClick}
+            onPointerDown={commonProps.onPointerDown}
+          />
+          <rect
+            x={shape.x}
+            y={shape.y}
+            width={shape.width}
+            height={shape.height}
+            fill="transparent"
+            stroke={shape.stroke}
+            strokeWidth={shape.strokeWidth}
+            strokeDasharray={shape.dash === "solid" ? "none" : shape.dash}
+            pointerEvents="none"
+          />
         </g>
       );
     case "sequence":
@@ -3446,10 +3490,11 @@ export default function App() {
     selectedShape?.type
   );
   const supportsFill = selectedShape
-    ? !["line", "arrow", "perp-line", "perp-marker", "text"].includes(
+    ? !["line", "arrow", "perp-line", "perp-marker", "text", "image"].includes(
         selectedShape.type
       )
     : false;
+  const supportsLabel = selectedShape ? selectedShape.type !== "image" : false;
   const supportsLineAnchor = selectedShape ? isLineShape(selectedShape) : false;
   const isTransparentFill = selectedShape?.fill === "transparent";
   const vertexCandidates = selectedShape ? getShapeVertices(selectedShape) : [];
@@ -3909,14 +3954,28 @@ export default function App() {
             </div>
           ) : selectedShape ? (
             <div className="properties">
-              <div className="property-row">
-                <label htmlFor="shape-label">Label</label>
-                <input
-                  id="shape-label"
-                  value={selectedShape.label}
-                  onChange={(event) => updateShape("label", event.target.value)}
-                />
-              </div>
+              {supportsLabel ? (
+                <div className="property-row">
+                  <label htmlFor="shape-label">Label</label>
+                  <input
+                    id="shape-label"
+                    value={selectedShape.label}
+                    onChange={(event) => updateShape("label", event.target.value)}
+                  />
+                </div>
+              ) : null}
+              {selectedShape.type === "image" ? (
+                <div className="property-row">
+                  <label htmlFor="shape-image-src">Image URL</label>
+                  <input
+                    id="shape-image-src"
+                    type="url"
+                    placeholder="https://example.com/image.png"
+                    value={selectedShape.src ?? ""}
+                    onChange={(event) => updateShape("src", event.target.value)}
+                  />
+                </div>
+              ) : null}
               <div className="property-row">
                 <label htmlFor="shape-stroke">Stroke</label>
                 <input
